@@ -11,7 +11,7 @@ cap.set(cv2.CAP_PROP_CONVERT_RGB, 0)
 
 i = 0
 if not cap.isOpened():
-    print("Nie udało się otworzyć kamery.")
+    print(f"Camera (number {config['webcam_no']}) unavailable")
     exit()
 
 while True:
