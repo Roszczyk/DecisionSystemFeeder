@@ -1,4 +1,4 @@
-# Infrared Vision
+# Daylight Colour Vision
 
 ## Overview
 
