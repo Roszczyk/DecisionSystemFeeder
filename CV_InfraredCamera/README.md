@@ -21,3 +21,12 @@ pip install -r requirements.txt
 
 In [*config.json*](config.json) file declare the following variables:
 * `webcam_no` - infrared camera's number (in Linux: `N` from `/dev/video{N}`)
+
+### Camera check
+
+If you want to verify if the camera works fine, run the following [script](view_from_IR.py). 
+
+```shell
+python view_from_IR.py
+```
+Getting the video from the IR camera means that the hardware is well connected and the configuration is correct
