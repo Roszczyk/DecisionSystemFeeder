@@ -11,14 +11,13 @@ To run infrared vision, the following hardware is used.
 
 ## Run
 
+### Requirements
+
 ```shell
 pip install -r requirements.txt
 ```
 
-Before running, check which ID the thermal camera has in your case and adjust the code.
+### Configuration
 
-```python
-cap = cv2.VideoCapture(ID)
-```
-
-**TO DO**: adjusting in config file.
+In [*config.json*](config.json) file declare the following variables:
+* `webcam_no` - infrared camera's number (in Linux: `N` from `/dev/video{N}`)

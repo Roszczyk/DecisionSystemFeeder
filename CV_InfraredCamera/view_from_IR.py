@@ -1,7 +1,12 @@
 import cv2
 import numpy as np
+from pathlib import Path
+import json
 
-cap = cv2.VideoCapture(2)
+with open(Path(__file__).parent / "config.json") as f:
+    config = json.load(f)
+
+cap = cv2.VideoCapture(config["webcam_no"])
 cap.set(cv2.CAP_PROP_CONVERT_RGB, 0) 
 
 i = 0
