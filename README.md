@@ -13,3 +13,7 @@ This repository contains the source codes and the docs for the following Master 
 |-----|-----|
 | Author   | inż. Mikołaj Roszczyk   |
 | Supervisor   | dr inż. Daniel Paczesny   |
+
+## Roadmap
+
+Full current roadmap available [here](Docs/roadmap.md).
