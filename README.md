@@ -1,6 +1,8 @@
 # Intelligent Feeder Decision System
 
-This repository contains the source codes and the docs for the following Master Thesis in the field of Computer Science (Intelligent Systems) conducted at the Faculty of Electronics and Information Technology, Warsaw University of Technology.
+## Project affiliation
+
+This project has been created in the process of preparing Master Thesis in the field of Computer Science (Intelligent Systems) conducted at the Faculty of Electronics and Information Technology, Warsaw University of Technology.
 
 ### Topic:
 |     |     |
