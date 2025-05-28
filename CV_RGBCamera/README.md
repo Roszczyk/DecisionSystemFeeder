@@ -7,7 +7,7 @@ The RGB camera will be used to detect birds and other animals in good light (mos
 ## Hardware
 
 To run RGB vision, the following hardware is used. 
-* ELP Svpro 4K Camera
+* ELP Svpro 4K Camera (*ELP USB4KCAM01H-CSV*)
 
 But the program should work with any kind of RGB camera.
 
