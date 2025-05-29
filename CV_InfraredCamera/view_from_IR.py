@@ -16,12 +16,19 @@ if not cap.isOpened():
 
 while True:
     ret, frame = cap.read()  
+    if not ret or frame is None:
+        print("Failed to grab frame")
+        continue
 
-    frame = np.reshape(frame[0],(2,192,256,2))
-    raw = frame[1,:,:,:].astype(np.intc)
-    raw = (raw[:,:,1] << 8) + raw[:,:,0]
-        
-    temp = raw/64 - 273.2
+    if frame.shape != (384, 256, 2):
+        print(f"Unexpected frame shape: {frame.shape}")
+        continue
+
+    frame = np.split(frame, 2, axis=0)
+    raw = frame[1].astype(np.intc).squeeze()
+    raw = (raw[:, :, 1] << 8) + raw[:, :, 0]
+    temp = raw / 64 - 273.2
+
     
     i += 1
     if i%20 == 0 :
