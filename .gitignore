@@ -2,3 +2,5 @@
 **/__pycache__/**
 **/*.exe
 datasets/**
+**/yolo*.pt
+runs/**
