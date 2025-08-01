@@ -25,7 +25,7 @@ for cls in class_names:
     cls_path = Path(input_dir) / cls
     images = list(cls_path.glob("*.jpg")) + list(cls_path.glob("*.png"))
 
-    for img_path in tqdm(images, desc=f"Przetwarzanie klasy: {cls}"):
+    for img_path in tqdm(images, desc=f"Processing class: {cls}"):
         img = Image.open(img_path).convert("RGBA")
         orig_w, orig_h = img.size
 
@@ -64,7 +64,7 @@ train_data = all_data[:split_idx]
 val_data = all_data[split_idx:]
 
 def save_yolo_dataset(data, split):
-    for i, (img, cls, cx, cy, w, h) in enumerate(tqdm(data, desc=f"Zapis {split}")):
+    for i, (img, cls, cx, cy, w, h) in enumerate(tqdm(data, desc=f"Saving {split}")):
         img_name = f"{cls}_{i:05d}.jpg"
         label_name = img_name.replace(".jpg", ".txt")
 
