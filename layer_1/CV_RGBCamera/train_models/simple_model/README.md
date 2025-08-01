@@ -35,7 +35,7 @@ It has been trained on the dataset created by merging various datasets from [ima
 
 ```Issue #2```: The results after Solution #1 are better - model works as a detector, not as a classifier. Problem is that the sizes of bounding box are always the same. 
 
-```Solution #2```: Random changes of images in the background (bounding boxes) added to the [the script](prepare_dataset_with_background.py).
+```Solution #2```: Random changes of size of the images put in the background (bounding boxes) added to the [the script](prepare_dataset_with_background.py).
 
 ```Python
 scale = random.uniform(0.5, 2.0)
