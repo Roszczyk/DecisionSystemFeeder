@@ -29,6 +29,17 @@ It has been trained on the dataset created by merging various datasets from [ima
     * [Person](https://images.cv/dataset/person-image-classification-dataset)
     * [Faces](https://images.cv/dataset/faces-image-classification-dataset)
 
-```Problem #1```: These datasets' images are cropped to contain only the detection, so YOLO bounding box has ```0.5 0.5 1 1``` coordinates for every item. This causes the problem that the model becomes a classifier, not a detector - even if the model predicts the class quite well, it gives ```0.5 0.5 1 1``` bounding box coordinates for every input.
+```Issue #1```: These datasets' images are cropped to contain only the detection, so YOLO bounding box has ```0.5 0.5 1 1``` coordinates for every item. This causes the problem that the model becomes a classifier, not a detector - even if the model predicts the class quite well, it gives ```0.5 0.5 1 1``` bounding box coordinates for every input.
 
-```Solution #1```: [The script](prepare_dataset_with_background.py) was developed that puts every image randomly in the white background creating new dataset with various label coordinates. 
+```Solution #1```: [The script](prepare_dataset_with_background.py) was developed that puts every image randomly in the white background creating new dataset with various label coordinates.
+
+```Issue #2```: The results after Solution #1 are better - model works as a detector, not as a classifier. Problem is that the sizes of bounding box are always the same. 
+
+```Solution #2```: Random changes of images in the background (bounding boxes) added to the [the script](prepare_dataset_with_background.py).
+
+```Python
+scale = random.uniform(0.5, 2.0)
+new_w = int(orig_w * scale)
+new_h = int(orig_h * scale)
+resized_img = img.resize((new_w, new_h), resample=Image.LANCZOS)
+```

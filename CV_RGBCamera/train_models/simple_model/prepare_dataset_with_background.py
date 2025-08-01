@@ -1,7 +1,5 @@
 import os
-import cv2
 import random
-import shutil
 from tqdm import tqdm
 from pathlib import Path
 from PIL import Image
@@ -19,7 +17,7 @@ for split in ["train", "val"]:
 class_names = sorted([d.name for d in Path(input_dir).iterdir() if d.is_dir()])
 class_to_idx = {cls: i for i, cls in enumerate(class_names)}
 
-print("Znalezione klasy:", class_to_idx)
+print("Classes found:", class_to_idx)
 
 all_data = []
 
@@ -32,26 +30,31 @@ for cls in class_names:
         orig_w, orig_h = img.size
 
         for _ in range(num_augmented_per_image):
+            scale = random.uniform(0.5, 2.0)
+            new_w = int(orig_w * scale)
+            new_h = int(orig_h * scale)
+            resized_img = img.resize((new_w, new_h), resample=Image.LANCZOS)
+
             canvas = Image.new("RGBA", canvas_size, (255, 255, 255, 255))
 
-            max_x = canvas_size[0] - orig_w
-            max_y = canvas_size[1] - orig_h
+            max_x = canvas_size[0] - new_w
+            max_y = canvas_size[1] - new_h
 
             if max_x < 0 or max_y < 0:
-                print(f"Obraz {img_path} jest większy niż tło — pomijam.")
+                print(f"Scaled image {img_path.name} is bigger than the background - skipping...")
                 continue
 
             x = random.randint(0, max_x)
             y = random.randint(0, max_y)
 
-            canvas.paste(img, (x, y), img)
+            canvas.paste(resized_img, (x, y), resized_img)
 
             canvas_rgb = canvas.convert("RGB")
 
-            center_x = (x + orig_w / 2) / canvas_size[0]
-            center_y = (y + orig_h / 2) / canvas_size[1]
-            width = orig_w / canvas_size[0]
-            height = orig_h / canvas_size[1]
+            center_x = (x + new_w / 2) / canvas_size[0]
+            center_y = (y + new_h / 2) / canvas_size[1]
+            width = new_w / canvas_size[0]
+            height = new_h / canvas_size[1]
 
             all_data.append((canvas_rgb, cls, center_x, center_y, width, height))
 
@@ -73,4 +76,4 @@ def save_yolo_dataset(data, split):
 save_yolo_dataset(train_data, "train")
 save_yolo_dataset(val_data, "val")
 
-print("✅ Gotowe! Dataset YOLO zapisany w:", output_dir)
+print("✅ Done! YOLO dataset saved in:", output_dir)

@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import cv2
 from pathlib import Path
 
-MODEL_PATH = Path(__file__).parent / "yolov8n.pt"
-IMAGE_PATH = Path(__file__).parent / 'test_image2.png'
+MODEL_PATH = Path(__file__).parent / "best.pt"
+IMAGE_PATH = Path(__file__).parent / 'test_image_squirrel_gorky.png'
 
 model = YOLO(MODEL_PATH)
 results = model(IMAGE_PATH)
