@@ -29,6 +29,8 @@ It has been trained on the dataset created by merging various datasets from [ima
     * [Person](https://images.cv/dataset/person-image-classification-dataset)
     * [Faces](https://images.cv/dataset/faces-image-classification-dataset)
 
+## Activity log - issues & solutions (or solution ideas)
+
 ```Issue #1```: These datasets' images are cropped to contain only the detection, so YOLO bounding box has ```0.5 0.5 1 1``` coordinates for every item. This causes the problem that the model becomes a classifier, not a detector - even if the model predicts the class quite well, it gives ```0.5 0.5 1 1``` bounding box coordinates for every input.
 
 ```Solution #1```: [The script](prepare_dataset_with_background.py) was developed that puts every image randomly in the white background creating new dataset with various label coordinates.
