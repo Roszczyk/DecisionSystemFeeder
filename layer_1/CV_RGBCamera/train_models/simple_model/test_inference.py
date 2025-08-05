@@ -4,7 +4,7 @@ import cv2
 from pathlib import Path
 
 MODEL_PATH = Path(__file__).parent / "best.pt"
-IMAGE_PATH = Path(__file__).parent / 'test_image_squirrel_gorky.png'
+IMAGE_PATH = Path(__file__).parent / 'test_image_squirrel2.jpg'
 
 model = YOLO(MODEL_PATH)
 results = model(IMAGE_PATH)

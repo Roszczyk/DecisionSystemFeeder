@@ -8,7 +8,7 @@ import os
 
 def run():
 
-    path_to_dataset = Path(__file__).parent / "../../../datasets"
+    path_to_dataset = Path(__file__).parent / "../../../../datasets"
     path_yolo_dataset = Path(__file__).parent / "yolo_dataset"
     images_dir = path_yolo_dataset / "images"
     labels_dir = path_yolo_dataset / "labels"
