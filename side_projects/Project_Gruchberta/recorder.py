@@ -4,14 +4,16 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 import json
+import sys
 
-RECORD_DIR = Path(__file__).parent / "recordings"
-CONFIG_FILE = Path(__file__).parent / "../config.json"
+CAM = sys.argv[1]
+RECORD_DIR = Path(__file__).parent / "recordings" / CAM
+CONFIG_FILE = Path(__file__).parent / "config.json"
 RECORD_SECONDS = 60 * 60  #1 hour
 DELETE_OLDER_THAN_HOURS = 24
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
-FPS = 20.0
+FPS = 2.0
 
 os.makedirs(RECORD_DIR, exist_ok=True)
 
@@ -37,7 +39,7 @@ def delete_old_files():
 
 
 def main():
-    cam_no = get_camera_config(CONFIG_FILE)["webcam_no"]
+    cam_no = get_camera_config(CONFIG_FILE)[CAM]
     cap = cv2.VideoCapture(cam_no)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_WIDTH)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_HEIGHT)
@@ -50,7 +52,7 @@ def main():
         start_time = time.time()
         now = datetime.now()
         filename = now.strftime("%Y-%m-%d_%H.avi")
-        filepath = os.path.join(RECORD_DIR, filename)
+        filepath = RECORD_DIR / filename
 
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         out = cv2.VideoWriter(filepath, fourcc, FPS, (FRAME_WIDTH, FRAME_HEIGHT))
