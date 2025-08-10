@@ -15,8 +15,12 @@ DELETE_OLDER_THAN_HOURS = 76
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
 FPS = 2.0
+IS_MODE_COMBINED = False
 
 os.makedirs(RECORD_DIR, exist_ok=True)
+
+if CAM == "COMBINED":
+    IS_MODE_COMBINED = True
 
 def get_camera_config(config_file):
     with open(config_file) as f:
@@ -90,13 +94,18 @@ def record_ir_camera(cam_no):
 
         out.release()
         delete_old_files()
-        print("Stopping gracefully")
+        
+        if IS_MODE_COMBINED:
+            end = True
 
         if end:
             break
 
     cap.release()
     cv2.destroyAllWindows()
+
+    if IS_MODE_COMBINED:
+        return
 
 def record_regular_camera(cam_no):
     cap = cv2.VideoCapture(cam_no)
@@ -127,17 +136,35 @@ def record_regular_camera(cam_no):
         out.release()
         delete_old_files()
 
+        if IS_MODE_COMBINED:
+            break
+
     cap.release()
     cv2.destroyAllWindows()
 
+    if IS_MODE_COMBINED:
+        return
+
 def main():
     config = get_camera_config(CONFIG_FILE)
-    cam_no = config[CAM]
+    FIRST=True
 
-    if CAM == "IRCAM":
-        record_ir_camera(cam_no)
-    else:
-        record_regular_camera(cam_no)
+    while IS_MODE_COMBINED or FIRST:
+        FIRST = False
+
+        now_time = datetime.now().hour
+        
+        if IS_MODE_COMBINED and (now_time >= 20 or now_time < 5):
+            CAM = "IRCAM"
+        elif IS_MODE_COMBINED and (now_time < 20 and now_time >= 5):
+            CAM = "RGBCAM"
+        
+        cam_no = config[CAM]
+
+        if CAM == "IRCAM":
+            record_ir_camera(cam_no)
+        else:
+            record_regular_camera(cam_no)
 
 if __name__ == "__main__":
     main()
