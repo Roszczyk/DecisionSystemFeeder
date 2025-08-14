@@ -14,7 +14,7 @@ RECORD_SECONDS = 60 * 60  # 1 hour
 DELETE_OLDER_THAN_HOURS = 76
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
-FPS = 2.0
+FPS = 15.0
 IS_MODE_COMBINED = False
 
 os.makedirs(RECORD_DIR, exist_ok=True)
@@ -86,7 +86,7 @@ def record_ir_camera(cam_no):
                     print("Failed to grab IR frame")
                     break
                 processed = process_ir_frame(frame)
-                # cv2.imshow('Thermal View', processed)    
+
                 if processed is not None:
                     out.write(processed)
         except KeyboardInterrupt:
