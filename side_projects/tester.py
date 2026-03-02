@@ -16,3 +16,7 @@ for i in range(10):
             print("Could not read frame from camera", i)
 
         cap.release()
+
+# To print all the cameras the following linux tool can be used:
+# sudo apt install v4l-utils
+# v4l2-ctl --list-devices
