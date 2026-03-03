@@ -2,12 +2,7 @@ import subprocess
 import json
 from pathlib import Path
 
-def run_configure():
-  
-  CONTEXT = Path(__file__).parent
-
-  with open(CONTEXT / "secrets.json", "r") as f:
-      secrets = json.load(f)
+def run_configure(secrets, context):
 
   DOCKER_COMPOSE_FILE = f"""
   version: '3.8'
@@ -64,28 +59,41 @@ def run_configure():
     flush_interval = "10s"
 
   [[outputs.influxdb_v2]]
-    urls = ["http://host.docker.internal:8086"]
+    urls = ["http://influxdb:8086"]
     token = "{secrets["Influx_Token"]}"
     organization = "FeederPW"
     bucket = "Feeder"
 
   [[inputs.mqtt_consumer]]
-    servers = ["tcp://host.docker.internal:1883"]
+    servers = ["tcp://mosquitto:1883"]
     topics = [
       "Feeder/IoT/#"
     ]
+
+    topic_exclude = [
+      "Feeder/IoT/bridge/#"
+    ]
+
     data_format = "json"
   """
 
-  with open(CONTEXT / "mosquitto.conf", "w") as mosquitto_file:
+  with open(context / "mosquitto.conf", "w") as mosquitto_file:
       mosquitto_file.write(MOSQUITTO_CONF)
 
-  with open(CONTEXT / "docker-compose.yml", "w") as docker_file:
+  with open(context / "docker-compose.yml", "w") as docker_file:
       docker_file.write(DOCKER_COMPOSE_FILE)
 
-  with open(CONTEXT / "telegraf.conf", "w") as telegraf_file:
+  with open(context / "telegraf.conf", "w") as telegraf_file:
       telegraf_file.write(TELEGRAF_CONF)
 
 if __name__ == "__main__":
   print("Running configuration")
-  run_configure()
+  
+  CONTEXT = Path(__file__).parent
+
+  with open(CONTEXT / "secrets.json", "r") as f:
+      secrets = json.load(f)
+
+  run_configure(secrets, CONTEXT)
+  
+  print("Done")
