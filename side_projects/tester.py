@@ -1,4 +1,5 @@
 import cv2
+from Photo_Taker.processing import process_ir_frame
 
 for i in range(10):
     cap = cv2.VideoCapture(i, cv2.CAP_V4L2)
@@ -9,9 +10,13 @@ for i in range(10):
         ret, frame = cap.read()
 
         if ret:
+            frame_copy = process_ir_frame(frame)
+            if frame_copy is not None:
+                print("Processed")
+                frame = frame_copy
             filename = f"camera_{i}.jpg"
             cv2.imwrite(filename, frame)
-            print("Saved photo:", filename)
+            print("Saved photo:", filename, " shape: ", frame.shape)
         else:
             print("Could not read frame from camera", i)
 

@@ -77,7 +77,8 @@ while True:
         ir_path = f"{SAVE_DIR}/bird_{timestamp}_ir.jpg"
 
         cv2.imwrite(img_path, frame)
-        cv2.imwrite(ir_path, ir_photo)
+        if ir_photo != None:
+            cv2.imwrite(ir_path, ir_photo)
         cv2.imwrite(bb_img_path, frame_copy)
 
         with open(txt_path, "w") as f:
