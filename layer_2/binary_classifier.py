@@ -11,17 +11,37 @@ class TruthTable:
 
 
 class BinaryClassifier:
-    def __init__(self, sensor : ScalarSensor, class_true : str, truth_table : TruthTable):
+    def __init__(self, sensor : ScalarSensor, class_true : str, truth_table : TruthTable,
+                 probability_threshold : float = 50.0):
         # SCALAR SENSOR TO BE DEVELOPED TO GENERAL SENSOR (TODO)
         self.sensor = sensor
         self.class_true = class_true
         self.truth_table = truth_table
+        self.probability_threshold = probability_threshold
 
-    def get_boolean_probability(self):
-        results = self.sensor.get_classes_probability() 
-        # get_classes_probability() is scalar sensor's function. to be generalized.
+    def get_boolean_probability(self, results = None):
+        if results is None:
+            results = self.sensor.get_classes_probability() 
+            # get_classes_probability() is scalar sensor's function. to be generalized.
         class_true_probability = results[self.class_true]
         return class_true_probability
+    
+    def get_value(self, results = None):
+        if results is None:
+            results = self.sensor.get_classes_probability()    
+            # get_classes_probability() is scalar sensor's function. to be generalized.
+        class_true_probability = results[self.class_true]
+        return class_true_probability >= self.probability_threshold
+
+    def get_value_and_prob(self, result = None):
+        if result is None:
+            result = self.sensor.get_classes_probability()
+            # get_classes_probability() is scalar sensor's function. to be generalized.
+        probability = self.get_boolean_probability(result)
+        return {
+            "value" : probability > self.probability_threshold,
+            "probability" : probability
+        }
 
 
 #                                       #
@@ -53,7 +73,7 @@ def dummy_run():
 
     binary_classifier = BinaryClassifier(sensor, class_true, None)
 
-    print(binary_classifier.get_boolean_probability() )
+    print(binary_classifier.get_value_and_prob() )
 
 if __name__ == "__main__":
     dummy_run()
