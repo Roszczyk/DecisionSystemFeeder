@@ -26,4 +26,5 @@ def process_ir_frame(frame, type = "static"):
     norm = cv2.normalize(temp, None, 0, 255, cv2.NORM_MINMAX)
     norm = norm.astype(np.uint8)
     colored = cv2.applyColorMap(norm, cv2.COLORMAP_JET)
+    colored = cv2.rotate(colored, cv2.ROTATE_90_CLOCKWISE)
     return colored

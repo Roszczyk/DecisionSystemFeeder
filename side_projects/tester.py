@@ -1,7 +1,7 @@
 import cv2
 from Photo_Taker.processing import process_ir_frame
 
-for i in range(10):
+for i in range(30):
     cap = cv2.VideoCapture(i, cv2.CAP_V4L2)
 
     if cap.isOpened():
