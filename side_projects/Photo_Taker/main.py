@@ -13,8 +13,8 @@ from processing import process_ir_frame
 def get_camera_config(config_file):
     with open(config_file) as f:
         return json.load(f)
-    
-def take_frame(cam_no, is_ir=False):
+
+def take_frame(cam_no, is_ir=False, rotate=False):
     cap = cv2.VideoCapture(cam_no)
     if not cap.isOpened():
         print("Cannot open camera")
@@ -25,6 +25,8 @@ def take_frame(cam_no, is_ir=False):
     cap.release()
     if is_ir:
         frame = process_ir_frame(frame)
+    if rotate:
+        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
     return frame
 
 SAVE_DIR = Path(__file__).parent / "birds"
@@ -34,6 +36,7 @@ CONF_THRESHOLD = 0.5
 config = get_camera_config(Path(__file__).parent / "config.json")
 CAMERA_RGB = config["RGBCAM"]
 CAMERA_IR = config["IRCAM"]
+CAMERA_RGB_2 = config["RGBCAM2"]
 
 os.makedirs(SAVE_DIR, exist_ok=True)
 
@@ -44,7 +47,7 @@ last_photo_time = 0
 print("Bird detection started...")
 
 while True:
-    frame = take_frame(CAMERA_RGB)
+    frame = take_frame(CAMERA_RGB, rotate=True)
     frame_copy = copy.deepcopy(frame)
 
     results = model(frame, verbose=False)[0]
@@ -56,7 +59,7 @@ while True:
         conf = float(box.conf[0])
         name = model.names[cls]
 
-        if name == "bird" and conf > CONF_THRESHOLD:
+        if (name == "bird" or name == "person") and conf > CONF_THRESHOLD:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             bird_boxes.append((name, conf, x1, y1, x2, y2))
 
@@ -69,17 +72,24 @@ while True:
     if len(bird_boxes) > 0 and (now - last_photo_time) > COOLDOWN:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-        img_path = f"{SAVE_DIR}/bird_{timestamp}.jpg"
-        txt_path = f"{SAVE_DIR}/bird_{timestamp}.txt"
-        bb_img_path = f"{SAVE_DIR}/bird_{timestamp}_bb.txt"
+        img_path = f"{SAVE_DIR}/{name}_{timestamp}.jpg"
+        txt_path = f"{SAVE_DIR}/{name}_{timestamp}.txt"
+        bb_img_path = f"{SAVE_DIR}/{name}_{timestamp}_bb.jpg"
+        img_rgb2_path = f"{SAVE_DIR}/{name}_{timestamp}_RGB2.txt"
 
-        ir_photo = take_frame(CAMERA_IR, True)
-        ir_path = f"{SAVE_DIR}/bird_{timestamp}_ir.jpg"
+        ir_photo = take_frame(CAMERA_IR, is_ir = True)
+        ir_path = f"{SAVE_DIR}/{name}_{timestamp}_ir.jpg"
 
         cv2.imwrite(img_path, frame)
-        if ir_photo != None:
+        if ir_photo is not None:
             cv2.imwrite(ir_path, ir_photo)
         cv2.imwrite(bb_img_path, frame_copy)
+
+        # second RGB camera save:
+        if CAMERA_RGB2 != -1:
+            rgb2_photo = take_frame(CAMERA_RGB2)
+            if rgb2_photo is not None:
+                cv2.imwrite(img_rgb2_path, rgb_photo)
 
         with open(txt_path, "w") as f:
             for name, conf, x1, y1, x2, y2 in bird_boxes:
