@@ -36,6 +36,7 @@ CONF_THRESHOLD = 0.5
 config = get_camera_config(Path(__file__).parent / "config.json")
 CAMERA_RGB = config["RGBCAM"]
 CAMERA_IR = config["IRCAM"]
+CAMERA_RGB_2 = config["RGBCAM2"]
 
 os.makedirs(SAVE_DIR, exist_ok=True)
 
@@ -74,6 +75,7 @@ while True:
         img_path = f"{SAVE_DIR}/{name}_{timestamp}.jpg"
         txt_path = f"{SAVE_DIR}/{name}_{timestamp}.txt"
         bb_img_path = f"{SAVE_DIR}/{name}_{timestamp}_bb.jpg"
+        img_rgb2_path = f"{SAVE_DIR}/{name}_{timestamp}_RGB2.txt"
 
         ir_photo = take_frame(CAMERA_IR, is_ir = True)
         ir_path = f"{SAVE_DIR}/{name}_{timestamp}_ir.jpg"
@@ -82,6 +84,12 @@ while True:
         if ir_photo is not None:
             cv2.imwrite(ir_path, ir_photo)
         cv2.imwrite(bb_img_path, frame_copy)
+
+        # second RGB camera save:
+        if CAMERA_RGB2 != -1:
+            rgb2_photo = take_frame(CAMERA_RGB2)
+            if rgb2_photo is not None:
+                cv2.imwrite(img_rgb2_path, rgb_photo)
 
         with open(txt_path, "w") as f:
             for name, conf, x1, y1, x2, y2 in bird_boxes:
