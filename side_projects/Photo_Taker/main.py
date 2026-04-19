@@ -14,7 +14,7 @@ def get_camera_config(config_file):
     with open(config_file) as f:
         return json.load(f)
 
-def take_frame(cam_no, is_ir=False):
+def take_frame(cam_no, is_ir=False, rotate=False):
     cap = cv2.VideoCapture(cam_no)
     if not cap.isOpened():
         print("Cannot open camera")
@@ -25,6 +25,8 @@ def take_frame(cam_no, is_ir=False):
     cap.release()
     if is_ir:
         frame = process_ir_frame(frame)
+    if rotate:
+        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
     return frame
 
 SAVE_DIR = Path(__file__).parent / "birds"
@@ -44,7 +46,7 @@ last_photo_time = 0
 print("Bird detection started...")
 
 while True:
-    frame = take_frame(CAMERA_RGB)
+    frame = take_frame(CAMERA_RGB, rotate=True)
     frame_copy = copy.deepcopy(frame)
 
     results = model(frame, verbose=False)[0]
@@ -73,7 +75,7 @@ while True:
         txt_path = f"{SAVE_DIR}/{name}_{timestamp}.txt"
         bb_img_path = f"{SAVE_DIR}/{name}_{timestamp}_bb.jpg"
 
-        ir_photo = take_frame(CAMERA_IR, True)
+        ir_photo = take_frame(CAMERA_IR, is_ir = True)
         ir_path = f"{SAVE_DIR}/{name}_{timestamp}_ir.jpg"
 
         cv2.imwrite(img_path, frame)
