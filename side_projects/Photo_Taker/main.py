@@ -26,7 +26,7 @@ def take_frame(cam_no, is_ir=False, rotate=False):
     if is_ir:
         frame = process_ir_frame(frame)
     if rotate:
-        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+        frame = cv2.rotate(frame, cv2.ROTATE_180)
     return frame
 
 SAVE_DIR = Path(__file__).parent / "birds"
@@ -86,8 +86,8 @@ while True:
         cv2.imwrite(bb_img_path, frame_copy)
 
         # second RGB camera save:
-        if CAMERA_RGB2 != -1:
-            rgb2_photo = take_frame(CAMERA_RGB2)
+        if CAMERA_RGB_2 != -1:
+            rgb2_photo = take_frame(CAMERA_RGB_2)
             if rgb2_photo is not None:
                 cv2.imwrite(img_rgb2_path, rgb_photo)
 
