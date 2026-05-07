@@ -75,6 +75,10 @@ def run_configure(secrets, context):
     ]
 
     data_format = "json"
+
+  [[processors.converter]]
+    [processors.converter.fields]
+      integer = ["trigger_indicator"]
   """
 
   with open(context / "mosquitto.conf", "w") as mosquitto_file:
