@@ -89,7 +89,7 @@ while True:
         if CAMERA_RGB_2 != -1:
             rgb2_photo = take_frame(CAMERA_RGB_2)
             if rgb2_photo is not None:
-                cv2.imwrite(img_rgb2_path, rgb_photo)
+                cv2.imwrite(img_rgb2_path, rgb2_photo)
 
         with open(txt_path, "w") as f:
             for name, conf, x1, y1, x2, y2 in bird_boxes:
