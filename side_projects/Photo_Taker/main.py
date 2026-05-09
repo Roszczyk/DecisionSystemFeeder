@@ -75,7 +75,7 @@ while True:
         img_path = f"{SAVE_DIR}/{name}_{timestamp}.jpg"
         txt_path = f"{SAVE_DIR}/{name}_{timestamp}.txt"
         bb_img_path = f"{SAVE_DIR}/{name}_{timestamp}_bb.jpg"
-        img_rgb2_path = f"{SAVE_DIR}/{name}_{timestamp}_RGB2.txt"
+        img_rgb2_path = f"{SAVE_DIR}/{name}_{timestamp}_RGB2.jpg"
 
         ir_photo = take_frame(CAMERA_IR, is_ir = True)
         ir_path = f"{SAVE_DIR}/{name}_{timestamp}_ir.jpg"
