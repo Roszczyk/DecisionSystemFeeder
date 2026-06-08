@@ -59,7 +59,7 @@ while True:
         conf = float(box.conf[0])
         name = model.names[cls]
 
-        if (name == "bird" or name == "person") and conf > CONF_THRESHOLD:
+        if (name == "bird") and conf > CONF_THRESHOLD:
             x1, y1, x2, y2 = map(int, box.xyxy[0])
             bird_boxes.append((name, conf, x1, y1, x2, y2))
 
@@ -72,13 +72,13 @@ while True:
     if len(bird_boxes) > 0 and (now - last_photo_time) > COOLDOWN:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-        img_path = f"{SAVE_DIR}/{name}_{timestamp}.jpg"
-        txt_path = f"{SAVE_DIR}/{name}_{timestamp}.txt"
-        bb_img_path = f"{SAVE_DIR}/{name}_{timestamp}_bb.jpg"
-        img_rgb2_path = f"{SAVE_DIR}/{name}_{timestamp}_RGB2.jpg"
+        img_path = f"{SAVE_DIR}/bird_{timestamp}.jpg"
+        txt_path = f"{SAVE_DIR}/birds_{timestamp}.txt"
+        bb_img_path = f"{SAVE_DIR}/bird_{timestamp}_bb.jpg"
+        img_rgb2_path = f"{SAVE_DIR}/bird_{timestamp}_RGB2.jpg"
 
         ir_photo = take_frame(CAMERA_IR, is_ir = True)
-        ir_path = f"{SAVE_DIR}/{name}_{timestamp}_ir.jpg"
+        ir_path = f"{SAVE_DIR}/bird_{timestamp}_ir.jpg"
 
         cv2.imwrite(img_path, frame)
         if ir_photo is not None:
