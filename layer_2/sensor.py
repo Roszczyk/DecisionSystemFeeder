@@ -5,9 +5,12 @@ from datetime import datetime
 from copy import deepcopy
 
 class Sensor:
-    def __init__(self, name : str, states_drafts : list[StateMeasured]):
+    def __init__(self, name : str, states_drafts : list[StateMeasured],
+                 conditional_probabilities : ConditionalProbabilitiesMatrix = None   # mostly for Bayes inference, optional
+                 ):
         self.name = name
         self.states_to_measure = states_drafts
+        self.conditional_probabilities = conditional_probabilities
 
     def get_states_probabilities(self, environment : Environment):
         return self.states_to_measure
@@ -18,7 +21,51 @@ class Sensor:
             "timestamp" : datetime.now(),
             "sensor_name" : self.name
         })
+    
+### UTILS FOR BAYES INFERENCE - Conditional Probabilities
 
+class ConditionalProbability:
+    def __init__(self, real_state : State, state_measured : StateMeasured, value : float):
+        self.friendly_name = f"P({state_measured.friendly_name}|{real_state.name})"
+        self.real = real_state
+        self.measured = state_measured
+        self.value = value
+
+class ConditionalProbabilitiesMatrix:
+    def __init__(self, real_states : list[State], measured_states : list[StateMeasured],
+                    conditional_probabilities : list[ConditionalProbability]):
+        self.matrix = dict()
+        for state in real_states:
+            self.matrix[state] = dict()
+        for prob in conditional_probabilities:
+            self.matrix[prob.real][prob.measured] = prob
+        # validate:
+        for real_s in real_states:
+            validating_sum = 0
+            for meas_s in measured_states:
+                assert meas_s in list(self.matrix[real_s].keys()), f"P({meas_s.friendly_name}|{real_s.name}) is not given"
+                validating_sum = validating_sum + self.matrix[real_s][meas_s].value
+            validating_sum = round(validating_sum, 3)
+            assert validating_sum == 1, \
+                    f"Sum for conditional probabilities for state {real_s.name} does not sum up to 1 (={validating_sum})"
+            
+    def get_value(self, real_state : State, measured_state : StateMeasured):
+        return self.matrix[real_state][measured_state]
+    
+    def get_value_by_friendly_name(self, real_state_name : str, meas_state_name : str):
+        real_state = None
+        meas_state = None
+        for state in self.matrix.keys():
+            if state.name == real_state_name:
+                real_state = state
+                break
+        assert real_state != None, f"State {real_state_name} wasn't found"
+        for state in self.matrix[real_state]:
+            if state.friendly_name == meas_state_name:
+                meas_state = state
+                break
+        assert meas_state != None
+        return self.matrix[real_state][meas_state]
 
 ################################
 ####### SCALAR SENSORS   #######
@@ -38,8 +85,10 @@ class LabelThreshold:
 
 class ScalarSensor(Sensor):
     def __init__(self, name : str, measure_function : function, uncertainty_relative : float, 
-                 uncertainty_absolute : float, labels_thresholds : list[LabelThreshold]):
-        super().__init__(name, [x.state for x in labels_thresholds])
+                 uncertainty_absolute : float, labels_thresholds : list[LabelThreshold],
+                 conditional_probabilities : ConditionalProbabilitiesMatrix = None ):
+        super().__init__(name, [x.state for x in labels_thresholds], 
+                         conditional_probabilities=conditional_probabilities)
         # measurement
         self.measure_function = measure_function
         # uncertainty calculation
@@ -69,3 +118,29 @@ class ScalarSensor(Sensor):
             label.state.mass = probability
             result.append(deepcopy(label.state))
         return result
+    
+
+# TESTING 
+
+if __name__ == "__main__":
+    states = [
+        State("X", 0.4), 
+        State("Y", 0.6)
+    ]
+    measured_states = [
+        StateMeasured(states, 0, "XvY"),
+        StateMeasured([states[0]], 0, "X"),
+        StateMeasured([states[1]], 0, "Y")
+    ]
+    conditional_probs = [
+        ConditionalProbability(states[0], measured_states[0], 0.4),
+        ConditionalProbability(states[1], measured_states[0], 0.3),
+        ConditionalProbability(states[0], measured_states[1], 0.5),
+        ConditionalProbability(states[1], measured_states[1], 0.6),
+        ConditionalProbability(states[0], measured_states[2], 0.1),
+        ConditionalProbability(states[1], measured_states[2], 0.1)
+    ]
+    matrix = ConditionalProbabilitiesMatrix(states, measured_states, conditional_probs)
+
+    print(matrix.get_value(states[0],measured_states[0]).value)
+    print(matrix.get_value_by_friendly_name("X", "XvY").value)
