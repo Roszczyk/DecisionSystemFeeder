@@ -4,7 +4,7 @@ import numpy as np
 import datetime 
 
 class Environment:
-    def __init__(self, states : list[State], state_changing_time_s : float = None):
+    def __init__(self, states : list[State], state_changing_time_s : float = None, environmental_metrics : list[Metric] = []):
         check_sum = 0
         for state in states:
             check_sum = check_sum + state.probability
@@ -16,6 +16,10 @@ class Environment:
         self.state_changing_routine = None if state_changing_time_s==None \
                         else datetime.timedelta(seconds = state_changing_time_s)
         self.last_state_change = datetime.datetime.now()
+        # environmental metrics are metrics that can be measured from the env, e.g. temperature
+        self.environmental_metrics = dict()
+        for met in environmental_metrics:
+            self.environmental_metrics[met.name] = met
 
     def get_random_state(self) -> State:
         s = [x for x in self.states]
@@ -39,6 +43,27 @@ class Environment:
             print(f"State {choose_state} not found, setting random state")
         self.current_state = self.get_current_state()
 
+    def measure_metric(self, metric_name : str):
+        assert metric_name in self.environmental_metrics.keys(), \
+            f"There's no such metric defined as {metric_name}"
+        metric = self.environmental_metrics[metric_name]
+        value = metric.measure(self.get_current_state())
+        return value
+    
+    def add_metric(self, new_metric : Metric, force : bool = False):
+        if new_metric.name not in self.environmental_metrics.keys() or force:
+            self.environmental_metrics[new_metric.name] = new_metric
+        else:
+            print(f"Metric {new_metric.name} is already existing")
+
+class Metric:
+    # Metrics are used to make scalar sensors measurement deterministic and related to the actual state
+    def __init__(self, metic_name : str, measuring_function : function):
+        self.name = metic_name
+        self.measuring_function = measuring_function # must take argument State
+
+    def measure(self, current_state : State):
+        return self.measuring_function(current_state)
 
 ###############################
 ###     TESTING SECTION     ###
