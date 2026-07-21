@@ -8,7 +8,8 @@ class Environment:
         check_sum = 0
         for state in states:
             check_sum = check_sum + state.probability
-        assert check_sum == 1, "States probabilities need to sum up to 1"
+        check_sum = round(check_sum, 3) # guard agains numeric issues with float while checking
+        assert check_sum == 1, f"States probabilities need to sum up to 1 not {check_sum}"
         self.states = states
         self.current_state = self.get_random_state()
         # if state_changing_time_s set to None, does not change until manually changed
