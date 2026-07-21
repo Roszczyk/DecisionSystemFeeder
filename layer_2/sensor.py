@@ -11,9 +11,9 @@ class Sensor:
     def get_states_probabilities(self, environment : Environment):
         return self.states_to_measure
     
-    def get_measurements_dict(self):
+    def get_measurements_dict(self, environment : Environment):
         return dict({
-            "results" : self.get_states_probabilities,
+            "results" : self.get_states_probabilities(environment),
             "timestamp" : datetime.now(),
             "sensor_name" : self.name
         })
