@@ -2,6 +2,7 @@ from states import StateMeasured, State
 from environment import Environment
 
 from datetime import datetime
+from copy import deepcopy
 
 class Sensor:
     def __init__(self, name : str, states_drafts : list[StateMeasured]):
@@ -30,7 +31,7 @@ from scipy.stats import norm
 class LabelThreshold:
     def __init__(self, state_represented : StateMeasured, lower_bound : float, upper_bound : float):
         self.name = state_represented.friendly_name
-        self.state = state_represented
+        self.state = deepcopy(state_represented)
         self.lower = lower_bound
         self.upper = upper_bound
 
@@ -66,5 +67,5 @@ class ScalarSensor(Sensor):
         for label in self.labels_thresholds:
             probability = self.gauss_probability(measurement, uncertainty, label)
             label.state.mass = probability
-            result.append(label.state)
+            result.append(deepcopy(label.state))
         return result

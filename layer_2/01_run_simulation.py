@@ -59,16 +59,16 @@ labels = [
 
 # Instances of type 1 sensor
 sensor_type1_unit1 = ScalarSensor("Type1_001", mock_measure_scalar_1, 0, 5, labels)
-sensor_type1_unit2 = ScalarSensor("Type1_002", mock_measure_scalar_1, 0.2, 2, labels)
+sensor_type1_unit2 = ScalarSensor("Type1_002", mock_measure_scalar_1, 0.2, 20, labels)
 sensor_type1_unit3 = ScalarSensor("Type1_003", mock_measure_scalar_1, 0.1, 10, labels)
 type1_sensors = [sensor_type1_unit1, sensor_type1_unit2, sensor_type1_unit3]
 
 # Getting the measurements from type 1 sensors
 probs = [x.get_measurements_dict(env) for x in type1_sensors]
-
+    
 # Print the results
 print("State: ", env.get_current_state().name)
 for prob in probs:
     print(prob["sensor_name"])
     for val in prob["results"]:
-        print(val.friendly_name, val.mass)
+        print(val.friendly_name, "\t", val.mass)
