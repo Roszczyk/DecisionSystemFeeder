@@ -18,7 +18,7 @@ env = Environment(states)   # environment with 4 states, not changing the state
 # SCALAR SENSOR TYPE 1 
 
 # Set up metric measured by type 1 sensor
-def type_1_measure_metric(state : State):
+def type_1_measure_metric(state : State, previous_value : float) -> float:
     if state.name == "A":
         base = 0
         multiplier = 60

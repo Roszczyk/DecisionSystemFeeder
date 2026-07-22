@@ -29,6 +29,7 @@ class ConditionalProbability:
         self.friendly_name = f"P({state_measured.friendly_name}|{real_state.name})"
         self.real = real_state
         self.measured = state_measured
+        assert value <= 1 and value >= 0, f"0 <= value ({value}) <= 1 not fulfilled"
         self.value = value
 
 class ConditionalProbabilitiesMatrix:

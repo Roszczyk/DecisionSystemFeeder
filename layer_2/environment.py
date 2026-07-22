@@ -58,12 +58,16 @@ class Environment:
 
 class Metric:
     # Metrics are used to make scalar sensors measurement deterministic and related to the actual state
-    def __init__(self, metic_name : str, measuring_function : function):
+    def __init__(self, metic_name : str, measuring_function : function, starting_value = 0):
         self.name = metic_name
-        self.measuring_function = measuring_function # must take argument State
+        self.measuring_function = measuring_function # must take 2 arguments State and Previous Value
+        # example: def measuring_sensor_func(state : State, previous_value : T) -> T (where T is any type)
+        self.previous_value = starting_value
 
     def measure(self, current_state : State):
-        return self.measuring_function(current_state)
+        value_measured = self.measuring_function(current_state, self.previous_value)
+        self.previous_value = value_measured
+        return value_measured
 
 ###############################
 ###     TESTING SECTION     ###
