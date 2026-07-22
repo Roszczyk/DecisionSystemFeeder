@@ -19,7 +19,7 @@ class Sensor:
         return dict({
             "results" : self.get_states_probabilities(environment),
             "timestamp" : datetime.now(),
-            "sensor_name" : self.name
+            "sensor" : self
         })
     
 ### UTILS FOR BAYES INFERENCE - Conditional Probabilities

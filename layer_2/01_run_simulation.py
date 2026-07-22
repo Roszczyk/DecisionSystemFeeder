@@ -1,6 +1,7 @@
-from sensor import ScalarSensor, LabelThreshold
+from sensor import ScalarSensor, LabelThreshold, ConditionalProbabilitiesMatrix, conditional_probabilities_matrix_helper
 from environment import Environment, Metric
 from states import State, StateMeasured
+from fusion import fusion_with_classical_bayes_inference
 
 import random
 
@@ -57,10 +58,17 @@ labels = [
     LabelThreshold(states_measured[2], 80, 256)
 ]
 
+conditional_probabilites_matrix = conditional_probabilities_matrix_helper([
+    [0.8, 0.1, 0.1],
+    [0.6, 0.3, 0.1],
+    [0.05, 0.9, 0.05],
+    [0.1, 0.2, 0.7]
+], states, states_measured)
+
 # Instances of type 1 sensor
-sensor_type1_unit1 = ScalarSensor("Type1_001", mock_measure_scalar_1, 0, 5, labels)
-sensor_type1_unit2 = ScalarSensor("Type1_002", mock_measure_scalar_1, 0.2, 20, labels)
-sensor_type1_unit3 = ScalarSensor("Type1_003", mock_measure_scalar_1, 0.1, 10, labels)
+sensor_type1_unit1 = ScalarSensor("Type1_001", mock_measure_scalar_1, 0, 5, labels, conditional_probabilites_matrix)
+sensor_type1_unit2 = ScalarSensor("Type1_002", mock_measure_scalar_1, 0.2, 20, labels, conditional_probabilites_matrix)
+sensor_type1_unit3 = ScalarSensor("Type1_003", mock_measure_scalar_1, 0.1, 10, labels, conditional_probabilites_matrix)
 type1_sensors = [sensor_type1_unit1, sensor_type1_unit2, sensor_type1_unit3]
 
 # Getting the measurements from type 1 sensors
@@ -69,6 +77,8 @@ probs = [x.get_measurements_dict(env) for x in type1_sensors]
 # Print the results
 print("State: ", env.get_current_state().name)
 for prob in probs:
-    print(prob["sensor_name"])
+    print(prob["sensor"].name)
     for val in prob["results"]:
         print(val.friendly_name, "\t", val.mass)
+
+print(fusion_with_classical_bayes_inference(probs, states).name)
