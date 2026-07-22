@@ -66,6 +66,19 @@ class ConditionalProbabilitiesMatrix:
                 break
         assert meas_state != None
         return self.matrix[real_state][meas_state]
+    
+def conditional_probabilities_matrix_helper(probs_as_list : list[list[float]], real_states : list[State],
+                                            measured_states : list[StateMeasured]):
+    temp_list = []
+    assert len(probs_as_list) == len(real_states), \
+        f"matrix rows ({len(probs_as_list)}) and number of states ({len(real_states)}) are not equal"
+    for row_no in range(len(probs_as_list)):
+        assert len(probs_as_list[row_no]) == len(measured_states),\
+            f"columns ({len(probs_as_list[row_no])}) and number of meas states ({len(measured_states)}) are not equal for row {row_no}"
+        for column_no in range(len(probs_as_list[row_no])):
+            temp_list.append(ConditionalProbability(real_states[row_no], measured_states[column_no], probs_as_list[row_no][column_no]))
+    return ConditionalProbabilitiesMatrix(real_states, measured_states, temp_list)
+    
 
 ################################
 ####### SCALAR SENSORS   #######
@@ -144,3 +157,11 @@ if __name__ == "__main__":
 
     print(matrix.get_value(states[0],measured_states[0]).value)
     print(matrix.get_value_by_friendly_name("X", "XvY").value)
+
+    array_for_helper = [
+        [0.4, 0.5, 0.1],
+        [0.3, 0.6, 0.1]
+    ]
+    matrix2 = conditional_probabilities_matrix_helper(array_for_helper, states, measured_states)
+    print(matrix2.get_value(states[0],measured_states[0]).value)
+    print(matrix2.get_value_by_friendly_name("X", "XvY").value)
