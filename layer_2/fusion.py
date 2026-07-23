@@ -1,9 +1,10 @@
 from states import StateMeasured, State
+from sensor import SensorOutputDict
 
 #################################
 #####   BAYES INFERENCE     #####
 #################################
-def fusion_with_classical_bayes_inference(sensor_outputs : list[dict], # measurement dicts (Sensor.get_measurements_dict())
+def fusion_with_classical_bayes_inference(sensor_outputs : list[SensorOutputDict], # measurement dicts (Sensor.get_measurements_dict())
                                 environment_states : list[State]):
     # classical Bayes inference = taking into consideration only the most likely option
     # sensor-determined probability is not taken into consideration, only a priori and a posteriori probability, 
@@ -14,10 +15,10 @@ def fusion_with_classical_bayes_inference(sensor_outputs : list[dict], # measure
     decisions_vector = []
     for s in sensor_outputs:
         sensor_decision = None
-        for r in s["results"]:
+        for r in s.results:
             if sensor_decision == None or r.mass > sensor_decision.mass:
                 sensor_decision = r
-        sensor_decision_tuple = (s["sensor"], sensor_decision)
+        sensor_decision_tuple = (s.sensor, sensor_decision)
         decisions_vector.append(sensor_decision_tuple)
     # acquire every state a priori probability P(x)
     a_priori_probs = dict()

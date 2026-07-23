@@ -77,8 +77,8 @@ probs = [x.get_measurements_dict(env) for x in type1_sensors]
 # Print the results
 print("State: ", env.get_current_state().name)
 for prob in probs:
-    print(prob["sensor"].name)
-    for val in prob["results"]:
+    print(prob.sensor.name)
+    for val in prob.results:
         print(val.friendly_name, "\t", val.mass)
 
 print(fusion_with_classical_bayes_inference(probs, states).name)

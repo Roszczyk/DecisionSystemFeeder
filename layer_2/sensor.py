@@ -12,16 +12,21 @@ class Sensor:
         self.states_to_measure = states_drafts
         self.conditional_probabilities = conditional_probabilities
 
-    def get_states_probabilities(self, environment : Environment):
+    def get_states_probabilities(self, environment : Environment) -> list[StateMeasured]:
         return self.states_to_measure
     
-    def get_measurements_dict(self, environment : Environment):
-        return dict({
-            "results" : self.get_states_probabilities(environment),
-            "timestamp" : datetime.now(),
-            "sensor" : self
-        })
-    
+    def get_measurements_dict(self, environment : Environment) -> SensorOutputDict:
+        return SensorOutputDict(
+            results = self.get_states_probabilities(environment),
+            sensor = self
+        )
+
+class SensorOutputDict:
+    def __init__(self, results : list[StateMeasured], sensor : Sensor, timestamp : datetime = None):
+        self.results = results
+        self.sensor = sensor
+        self.timestamp = timestamp if timestamp is not None else datetime.now()
+
 ### UTILS FOR BAYES INFERENCE - Conditional Probabilities
 
 class ConditionalProbability:
