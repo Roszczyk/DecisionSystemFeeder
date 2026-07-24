@@ -1,5 +1,5 @@
-from states import StateMeasured, State
-from sensor import SensorOutputDict
+from src.states import StateMeasured, State
+from src.sensor import SensorOutputDict
 
 #################################
 #####   BAYES INFERENCE     #####

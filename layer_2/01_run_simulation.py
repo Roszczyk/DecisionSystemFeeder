@@ -1,7 +1,7 @@
-from sensor import ScalarSensor, LabelThreshold, ConditionalProbabilitiesMatrix, conditional_probabilities_matrix_helper
-from environment import Environment, Metric
-from states import State, StateMeasured
-from fusion import fusion_with_classical_bayes_inference, fusion_simple_voting
+from src.sensor import ScalarSensor, LabelThreshold, conditional_probabilities_matrix_helper
+from src.environment import Environment, Metric
+from src.states import State, StateMeasured
+from src.fusion import fusion_with_classical_bayes_inference, fusion_simple_voting
 
 import random
 
