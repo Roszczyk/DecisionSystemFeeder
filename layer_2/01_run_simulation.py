@@ -1,7 +1,7 @@
 from sensor import ScalarSensor, LabelThreshold, ConditionalProbabilitiesMatrix, conditional_probabilities_matrix_helper
 from environment import Environment, Metric
 from states import State, StateMeasured
-from fusion import fusion_with_classical_bayes_inference
+from fusion import fusion_with_classical_bayes_inference, fusion_simple_voting
 
 import random
 
@@ -81,4 +81,10 @@ for prob in probs:
     for val in prob.results:
         print(val.friendly_name, "\t", val.mass)
 
-print(fusion_with_classical_bayes_inference(probs, states).name)
+final_decision = fusion_with_classical_bayes_inference(probs, states)
+
+print(f"Final decision classic Bayes:\n{final_decision.friendly_name}\t{final_decision.mass}")
+
+final_decision = fusion_simple_voting(probs, states)
+
+print(f"Final decision simple voting:\n{final_decision.friendly_name}\t{final_decision.mass}")

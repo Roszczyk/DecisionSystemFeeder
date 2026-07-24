@@ -13,6 +13,7 @@ class Sensor:
         self.conditional_probabilities = conditional_probabilities
 
     def get_states_probabilities(self, environment : Environment) -> list[StateMeasured]:
+        # this function should be overwritten by a subclass
         return self.states_to_measure
     
     def get_measurements_dict(self, environment : Environment) -> SensorOutputDict:

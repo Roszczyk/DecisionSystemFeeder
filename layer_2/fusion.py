@@ -5,7 +5,7 @@ from sensor import SensorOutputDict
 #####   BAYES INFERENCE     #####
 #################################
 def fusion_with_classical_bayes_inference(sensor_outputs : list[SensorOutputDict], # measurement dicts (Sensor.get_measurements_dict())
-                                environment_states : list[State]):
+                                environment_states : list[State])   -> StateMeasured:
     # classical Bayes inference = taking into consideration only the most likely option
     # sensor-determined probability is not taken into consideration, only a priori and a posteriori probability, 
     #   which are the parameters of the environment (of state) and sensors (conditional probs)
@@ -47,16 +47,60 @@ def fusion_with_classical_bayes_inference(sensor_outputs : list[SensorOutputDict
         if final_decision == None or \
                 conditional_probs_x_y_vector[x] > conditional_probs_x_y_vector[final_decision]:
             final_decision = x
-    # the final decision was infered
+    # the final decision was 
+    final_decision = StateMeasured([final_decision], conditional_probs_x_y_vector[final_decision], final_decision.name)
     return final_decision
+
+def fusion_with_bayes_inference_sensor_prob(sensor_outputs : list[SensorOutputDict], # measurement dicts (Sensor.get_measurements_dict())
+                                environment_states : list[State])   -> StateMeasured:
+    pass
 
 #################################
 #####   DEMPSTER-SHAFER     #####
 #################################
-# TODO
+def fusion_with_dempster_shafer(sensor_outputs : list[SensorOutputDict], 
+                                environment_states : list[State])   -> StateMeasured:
+    pass
 
 
 #################################
-#####     SIMPLE VOTING     #####
+#####         VOTING        #####
 #################################
-# TODO
+def fusion_simple_voting(sensor_outputs : list[SensorOutputDict],
+                         environment_states : list[State]) -> StateMeasured:
+    # prepare the counter
+    count_results = dict()
+    for state in environment_states:
+        count_results[state.name] = 0
+    for s in sensor_outputs:
+    # find the sensor's choice
+        if len(s.results) == 0: 
+            print(f"Sensor {s.sensor.name} gave no results")
+            continue
+        sensor_choice = None
+        for r in s.results:
+            if sensor_choice == None or r.mass > sensor_choice.mass:
+                sensor_choice = r
+    # add the choice to the counter
+        for state in sensor_choice.states:
+            count_results[state.name] = count_results[state.name] + 1
+    # as a final decision choose the state with highest score
+    final_decision = []
+    for state in count_results.keys():
+        if len(final_decision) == 0 or count_results[final_decision[0]] == count_results[state]:
+            final_decision.append(state)
+        elif count_results[final_decision[0]] < count_results[state]:
+            final_decision = [state]
+    # prepare final StateMeasured to return
+    mass = count_results[final_decision[0]] / len(sensor_outputs)
+    name = ""
+    temp = []
+    for state_name in final_decision:
+        for state in environment_states:
+            if state_name == state.name:
+                temp.append(state)
+    for s in final_decision:
+        name = name + s + "/"
+    name = name.rstrip("/")
+    final_decision = StateMeasured(temp, mass, name)
+    return final_decision
