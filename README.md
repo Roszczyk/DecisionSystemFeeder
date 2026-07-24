@@ -23,3 +23,4 @@ Full current roadmap available [here](Docs/roadmap.md).
 ## Papers and reports
 
 * Mikołaj Roszczyk - Raport z Pracowni Problemowej Magisterskiej, 2025 ([get content](Docs/Roszczyk_M_2025_Raport_PPMGR.pdf))
+* Mikołaj Roszczyk - Raport z Pracowni Dyplomowej Magisterskiej, 2025 ([get content](Docs/Roszczyk_M_2026_Raport_PDMGR.pdf))
