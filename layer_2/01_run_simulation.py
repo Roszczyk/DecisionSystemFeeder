@@ -1,7 +1,7 @@
 from src.sensor import ScalarSensor, LabelThreshold, conditional_probabilities_matrix_helper
 from src.environment import Environment, Metric
 from src.states import State, StateMeasured
-from src.fusion import fusion_with_classical_bayes_inference, fusion_simple_voting
+from src.fusion import fusion_with_classical_bayes_inference, fusion_simple_voting, fusion_cumulative_voting, fusion_approval_voting
 
 import random
 
@@ -88,3 +88,15 @@ print(f"Final decision classic Bayes:\n{final_decision.friendly_name}\t{final_de
 final_decision = fusion_simple_voting(probs, states)
 
 print(f"Final decision simple voting:\n{final_decision.friendly_name}\t{final_decision.mass}")
+
+final_decision = fusion_cumulative_voting(probs, states)
+
+print(f"Final decision cumulative voting:\n{final_decision.friendly_name}\t{final_decision.mass}")
+
+final_decision = fusion_approval_voting(probs, states, config="minimum_approval")
+
+print(f"Final decision approval voting (min approv):\n{final_decision.friendly_name}\t{final_decision.mass}")
+
+final_decision = fusion_approval_voting(probs, states, config="highest")
+
+print(f"Final decision approval voting (highest):\n{final_decision.friendly_name}\t{final_decision.mass}")
