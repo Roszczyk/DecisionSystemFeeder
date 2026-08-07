@@ -41,7 +41,7 @@ class Environment:
                     self.current_state = x
                     return
             print(f"State {choose_state} not found, setting random state")
-        self.current_state = self.get_current_state()
+        self.current_state = self.get_random_state()
 
     def measure_metric(self, metric_name : str):
         assert metric_name in self.environmental_metrics.keys(), \
@@ -55,6 +55,9 @@ class Environment:
             self.environmental_metrics[new_metric.name] = new_metric
         else:
             print(f"Metric {new_metric.name} is already existing")
+
+    def get_env_states(self):
+        return self.states
 
 class Metric:
     # Metrics are used to make scalar sensors measurement deterministic and related to the actual state
