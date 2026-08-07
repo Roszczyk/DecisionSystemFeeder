@@ -70,7 +70,16 @@ def fusion_with_bayes_inference_sensor_prob(sensor_outputs : list[SensorOutputDi
 #################################
 def fusion_with_dempster_shafer(sensor_outputs : list[SensorOutputDict], 
                                 environment_states : list[State])   -> StateMeasured:
-    pass
+    # prepare decisions vector y->
+    decisions_vector = []
+    for s in sensor_outputs:
+        sensor_decision = None
+        for r in s.results:
+            if sensor_decision == None or r.mass > sensor_decision.mass:
+                sensor_decision = r
+        sensor_decision_tuple = (s.sensor, sensor_decision)
+        decisions_vector.append(sensor_decision_tuple)
+    # TODO
 
 
 #################################
