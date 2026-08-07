@@ -2,6 +2,7 @@ from src.sensor import ScalarSensor, LabelThreshold, conditional_probabilities_m
 from src.environment import Environment, Metric
 from src.states import State, StateMeasured
 from src.fusion import fusion_with_classical_bayes_inference, fusion_simple_voting, fusion_cumulative_voting, fusion_approval_voting
+from src.simulation import Simulation
 
 import random
 
@@ -81,22 +82,37 @@ for prob in probs:
     for val in prob.results:
         print(val.friendly_name, "\t", val.mass)
 
-final_decision = fusion_with_classical_bayes_inference(probs, states)
+# final_decision = fusion_with_classical_bayes_inference(probs, states)
 
-print(f"Final decision classic Bayes:\n{final_decision.friendly_name}\t{final_decision.mass}")
+# print(f"Final decision classic Bayes:\n{final_decision.friendly_name}\t{final_decision.mass}")
 
-final_decision = fusion_simple_voting(probs, states)
+# final_decision = fusion_simple_voting(probs, states)
 
-print(f"Final decision simple voting:\n{final_decision.friendly_name}\t{final_decision.mass}")
+# print(f"Final decision simple voting:\n{final_decision.friendly_name}\t{final_decision.mass}")
 
-final_decision = fusion_cumulative_voting(probs, states)
+# final_decision = fusion_cumulative_voting(probs, states)
 
-print(f"Final decision cumulative voting:\n{final_decision.friendly_name}\t{final_decision.mass}")
+# print(f"Final decision cumulative voting:\n{final_decision.friendly_name}\t{final_decision.mass}")
 
-final_decision = fusion_approval_voting(probs, states, config="minimum_approval")
+# final_decision = fusion_approval_voting(probs, states, config="minimum_approval")
 
-print(f"Final decision approval voting (min approv):\n{final_decision.friendly_name}\t{final_decision.mass}")
+# print(f"Final decision approval voting (min approv):\n{final_decision.friendly_name}\t{final_decision.mass}")
 
-final_decision = fusion_approval_voting(probs, states, config="highest")
+# final_decision = fusion_approval_voting(probs, states, config="highest")
 
-print(f"Final decision approval voting (highest):\n{final_decision.friendly_name}\t{final_decision.mass}")
+# print(f"Final decision approval voting (highest):\n{final_decision.friendly_name}\t{final_decision.mass}")
+
+classical_bayes_sim = Simulation("classical Bayes", fusion_with_classical_bayes_inference, env, type1_sensors)
+simple_voting_sim = Simulation("simple voting", fusion_simple_voting, env, type1_sensors)
+cumulative_voting_sim = Simulation("cumulative vote", fusion_cumulative_voting, env, type1_sensors)
+approval_voting_sim = Simulation("approval voting", fusion_approval_voting, env, type1_sensors)
+
+classical_bayes_res = classical_bayes_sim.run_accuracy()
+simple_voting_res = simple_voting_sim.run_accuracy()
+cumulative_voting_res = cumulative_voting_sim.run_accuracy()
+approval_voting_res = approval_voting_sim.run_accuracy()
+
+print(classical_bayes_res)
+print(simple_voting_res)
+print(cumulative_voting_res)
+print(approval_voting_res)

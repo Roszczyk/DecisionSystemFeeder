@@ -1,6 +1,15 @@
 from src.states import StateMeasured, State
 from src.sensor import SensorOutputDict
 
+class FusionLibrary:
+    def __init__(self):
+        self.methods = dict({
+            "classical Bayes" : fusion_with_classical_bayes_inference,
+            "simple voting" : fusion_simple_voting,
+            "cumulative voting" : fusion_cumulative_voting,
+            "approval voting" : fusion_approval_voting
+        })
+
 #################################
 #####   BAYES INFERENCE     #####
 #################################
