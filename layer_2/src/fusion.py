@@ -69,17 +69,26 @@ def fusion_with_bayes_inference_sensor_prob(sensor_outputs : list[SensorOutputDi
 #####   DEMPSTER-SHAFER     #####
 #################################
 def fusion_with_dempster_shafer(sensor_outputs : list[SensorOutputDict], 
-                                environment_states : list[State])   -> StateMeasured:
-    # prepare decisions vector y->
-    decisions_vector = []
-    for s in sensor_outputs:
-        sensor_decision = None
-        for r in s.results:
-            if sensor_decision == None or r.mass > sensor_decision.mass:
-                sensor_decision = r
-        sensor_decision_tuple = (s.sensor, sensor_decision)
-        decisions_vector.append(sensor_decision_tuple)
-    # TODO
+                                environment_states : list[State],
+                                decision_config : str = "belief_interval")   -> StateMeasured:
+    import src.dst_utils as dst
+    assert decision_config in ["belief_interval", "highest_belief", "highest_plausibility"] # + highest_mass TODO
+    # apply Dempster combination rule to fuse sensors
+    for i in range(len(sensor_outputs)-1):
+        combined = dst.dempster_combination_rule(sensor_outputs[i].results, sensor_outputs[i+1].results)
+    # decision-making - preparations
+    calculate_plausibility = True if decision_config in ["belief_interval", "highest_plausibility"] else False
+    calculate_belief = True if decision_config in ["belief_interval", "highest_belief"] else False
+    if calculate_plausibility:
+        plausibility = {}
+        for state in environment_states:
+            plausibility[state] = dst.plausibility_function([state], combined)
+    if calculate_belief:
+        belief = {}
+        for state in environment_states:
+            belief[state] = dst.belief_function([state], combined)
+    # decision-making
+    # TODO I should consider returning all the fused StateMeasured in each fusion method
 
 
 #################################

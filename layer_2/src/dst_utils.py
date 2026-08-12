@@ -3,9 +3,10 @@ if __name__ == "__main__":
 else:
     from src.states import StateMeasured, State
 
-def dempster_combination_rule(
-        sensor_1_results : list[StateMeasured],
-        sensor_2_results : list[StateMeasured]):
+def dempster_combination_rule(                      # m1 ⊕ m2(C) = (Σ A∩B=C m1(A)×m2(B)) / (1 −Σ A∩B=∅ m1(A)×m2(B))
+        sensor_1_results : list[StateMeasured],     # Wyniki sensora 1 - zdarzenia A
+        sensor_2_results : list[StateMeasured]      # Wyniki sensora 2 - zdarzenia B
+    ) -> list[StateMeasured]:
     # Prepare dictionaries in the simple form for m1 and m2
     m1 = {}
     m2 = {}
@@ -53,9 +54,9 @@ def dempster_combination_rule(
     return states_measured_format
 
 
-def belief_function(
-        context_states : list[State],
-        results : list[StateMeasured]):
+def belief_function(                                # Bel(A) = Σ B⊆A m(B) 
+        context_states : list[State],               # Lista stanów składających się na zdarzenie A
+        results : list[StateMeasured]):             # Wyniki - zdarzenia B
     mass_sum = 0.0
     ctx_list = [x.name for x in context_states]
     for res in results:
@@ -70,9 +71,9 @@ def belief_function(
             mass_sum += res.mass
     return mass_sum
 
-def plausibility_function(
-        context_states : list[State],
-        results : list[StateMeasured]):
+def plausibility_function(                          # Pl(A) = Σ B∩A̸=∅ m(B)
+        context_states : list[State],               # Lista stanów składających się na zdarzenie A
+        results : list[StateMeasured]):             # Wyniki - zdarzenia B
     mass_sum = 0.0
     for res in results:
         add = False
