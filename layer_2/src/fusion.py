@@ -80,8 +80,8 @@ def dempster_shafer_fusing_full_outputs(sensor_outputs : list[SensorOutputDict],
     for i in range(len(sensor_outputs)-1):
         combined = dst.dempster_combination_rule(combined, sensor_outputs[i+1].results)
     # decision-making - preparations
-    calculate_plausibility = True if decision_config in ["belief_interval", "highest_plausibility"] else False
-    calculate_belief = True if decision_config in ["belief_interval", "highest_belief"] else False
+    calculate_plausibility = True if decision_config in ["belief_interval", "plausibility"] else False
+    calculate_belief = True if decision_config in ["belief_interval", "belief"] else False
     if calculate_plausibility:
         plausibility = {}
         for state in environment_states:
@@ -139,7 +139,7 @@ def fusion_with_dempster_shafer(sensor_outputs : list[SensorOutputDict],
         highest = []
         highest_val = -1.0
         for state in states_list:
-            state_val = state.belief if focus == "belief" else state.plausibiltiy
+            state_val = state.belief if focus == "belief" else state.plausibility
             if len(highest) == 0 or highest_val == state_val:
                 highest.append(state)
                 highest_val = state_val
@@ -175,10 +175,6 @@ def fusion_with_dempster_shafer(sensor_outputs : list[SensorOutputDict],
         fused_mass = highest[0].mass * len(highest) if returned_mass_is_a_fusion else highest[0].mass
         fused_decisions = StateMeasured(fused_states, fused_mass, "/".join([x.friendly_name for x in highest]))
         return fused_decisions
-
-
-
-
 
 
 #################################
