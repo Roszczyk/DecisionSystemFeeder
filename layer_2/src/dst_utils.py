@@ -3,9 +3,18 @@ if __name__ == "__main__":
 else:
     from src.states import StateMeasured, State
 
+
+class StateMeasured_with_BeliefInterval(StateMeasured):
+    def __init__(self, fused_states : list[State], belief : float, plausibility : float, friendly_name : str = "unnamed"):
+        assert belief <= plausibility, "Pl(A) has to be greater or equal Bel(A)"
+        self.friendly_name = friendly_name
+        self.states = fused_states
+        self.belief = belief
+        self.plausibility = plausibility
+
 def dempster_combination_rule(                      # m1 ⊕ m2(C) = (Σ A∩B=C m1(A)×m2(B)) / (1 −Σ A∩B=∅ m1(A)×m2(B))
-        sensor_1_results : list[StateMeasured],     # Wyniki sensora 1 - zdarzenia A
-        sensor_2_results : list[StateMeasured]      # Wyniki sensora 2 - zdarzenia B
+        sensor_1_results : list[StateMeasured],     # Results of sensor 1 - events A
+        sensor_2_results : list[StateMeasured]      # Results of sensor 2 - events B
     ) -> list[StateMeasured]:
     # Prepare dictionaries in the simple form for m1 and m2
     m1 = {}
@@ -55,8 +64,8 @@ def dempster_combination_rule(                      # m1 ⊕ m2(C) = (Σ A∩B=C
 
 
 def belief_function(                                # Bel(A) = Σ B⊆A m(B) 
-        context_states : list[State],               # Lista stanów składających się na zdarzenie A
-        results : list[StateMeasured]):             # Wyniki - zdarzenia B
+        context_states : list[State],               # List of states making up event A
+        results : list[StateMeasured]):             # Results - events B
     mass_sum = 0.0
     ctx_list = [x.name for x in context_states]
     for res in results:
@@ -71,9 +80,10 @@ def belief_function(                                # Bel(A) = Σ B⊆A m(B)
             mass_sum += res.mass
     return mass_sum
 
+
 def plausibility_function(                          # Pl(A) = Σ B∩A̸=∅ m(B)
-        context_states : list[State],               # Lista stanów składających się na zdarzenie A
-        results : list[StateMeasured]):             # Wyniki - zdarzenia B
+        context_states : list[State],               # List of states making up event A
+        results : list[StateMeasured]):             # Results - events B
     mass_sum = 0.0
     for res in results:
         add = False

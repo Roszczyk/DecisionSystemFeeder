@@ -102,8 +102,10 @@ for prob in probs:
 
 # print(f"Final decision approval voting (highest):\n{final_decision.friendly_name}\t{final_decision.mass}")
 
-dst_sim = Simulation("Dempster-Shafer", fusion_with_dempster_shafer, env, type1_sensors)
-dst_sim.run_accuracy()
+dst_belief_interval = lambda x,y: fusion_with_dempster_shafer(x,y, "highest_mass")
+dst_sim = Simulation("Dempster-Shafer", dst_belief_interval, env, type1_sensors)
+dst_accuracy = dst_sim.run_accuracy(1000)
+print(dst_accuracy)
 
 # classical_bayes_sim = Simulation("classical Bayes", fusion_with_classical_bayes_inference, env, type1_sensors)
 # simple_voting_sim = Simulation("simple voting", fusion_simple_voting, env, type1_sensors)

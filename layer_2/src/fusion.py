@@ -1,6 +1,8 @@
 from src.states import StateMeasured, State
 from src.sensor import SensorOutputDict
 
+from copy import deepcopy
+
 class FusionLibrary:
     def __init__(self):
         self.methods = dict({
@@ -68,14 +70,15 @@ def fusion_with_bayes_inference_sensor_prob(sensor_outputs : list[SensorOutputDi
 #################################
 #####   DEMPSTER-SHAFER     #####
 #################################
-def fusion_with_dempster_shafer(sensor_outputs : list[SensorOutputDict], 
+def dempster_shafer_fusing_full_outputs(sensor_outputs : list[SensorOutputDict], 
                                 environment_states : list[State],
-                                decision_config : str = "belief_interval")   -> StateMeasured:
+                                decision_config : str = "fused_mass")   -> list[StateMeasured]:
     import src.dst_utils as dst
-    assert decision_config in ["belief_interval", "highest_belief", "highest_plausibility"] # + highest_mass TODO
+    assert decision_config in ["belief_interval", "belief", "plausibility", "fused_mass"]
     # apply Dempster combination rule to fuse sensors
+    combined = sensor_outputs[0].results
     for i in range(len(sensor_outputs)-1):
-        combined = dst.dempster_combination_rule(sensor_outputs[i].results, sensor_outputs[i+1].results)
+        combined = dst.dempster_combination_rule(combined, sensor_outputs[i+1].results)
     # decision-making - preparations
     calculate_plausibility = True if decision_config in ["belief_interval", "highest_plausibility"] else False
     calculate_belief = True if decision_config in ["belief_interval", "highest_belief"] else False
@@ -88,7 +91,94 @@ def fusion_with_dempster_shafer(sensor_outputs : list[SensorOutputDict],
         for state in environment_states:
             belief[state] = dst.belief_function([state], combined)
     # decision-making
-    # TODO I should consider returning all the fused StateMeasured in each fusion method
+    decision_output_list = []
+    if decision_config == "belief":
+        for state in environment_states:
+            decision_output_list.append(StateMeasured([state], belief[state], state.name))
+    elif decision_config == "plausibility":
+        for state in environment_states:
+            decision_output_list.append(StateMeasured([state], plausibility[state], state.name))
+    elif decision_config == "fused_mass":
+        decision_output_list = combined
+    elif decision_config == "belief_interval":
+        for state in environment_states:
+            decision_output_list.append(dst.StateMeasured_with_BeliefInterval([state], belief[state], plausibility[state], state.name))
+    return decision_output_list
+
+def fusion_with_dempster_shafer(sensor_outputs : list[SensorOutputDict], 
+                                environment_states : list[State],
+                                decision_config : str = "highest_mass",
+                                returned_mass_is_a_fusion : bool = False        # if True and if a few events have the same mass, the result
+                                                                                # object will have a mass that is a sum of its elements
+    ) -> StateMeasured:
+    assert decision_config in ["belief_interval_belief_focus", "belief_interval_plausibility_focus",
+                                "highest_belief", "highest_plausibility", "highest_mass"]
+    # get full outputs in the specific config for DST fusion
+    org_config = "belief_interval" if decision_config in ["belief_interval_belief_focus", "belief_interval_plausibility_focus"] else \
+                    "belief" if decision_config == "highest_belief" else \
+                    "plausibility" if decision_config == "highest_plausibility" else \
+                    "fused_mass" if decision_config == "highest_mass" else \
+                    None
+    assert org_config is not None
+    states_list = dempster_shafer_fusing_full_outputs(sensor_outputs, environment_states, org_config)
+    # choose the best option according to the chosen method (config)
+    if decision_config in ["belief_interval_belief_focus", "belief_interval_plausibility_focus"]:
+        focus = decision_config.split("_")[-2]
+        undominated = []
+        dominated = []
+        for opt1 in states_list:
+            for opt2 in states_list:
+                if opt1.friendly_name == opt2.friendly_name:
+                    continue
+                if opt1.belief >= opt2.belief and opt1.plausibility >= opt2.plausibility and \
+                    (opt1.belief > opt2.belief or opt1.plausibility > opt2.plausibility):
+                    dominated.append(opt2)
+        for state in states_list:
+            if state not in dominated:
+                undominated.append(state)
+        highest = []
+        highest_val = -1.0
+        for state in states_list:
+            state_val = state.belief if focus == "belief" else state.plausibiltiy
+            if len(highest) == 0 or highest_val == state_val:
+                highest.append(state)
+                highest_val = state_val
+            elif highest_val < state_val:
+                highest = [state]
+                highest_val = state_val
+        fused_states = []
+        for node in highest:
+            fused_states += node.states
+        fused_mass = highest_val * len(highest) if returned_mass_is_a_fusion else highest_val
+        fused_decisions = StateMeasured(fused_states, fused_mass, "/".join([x.friendly_name for x in highest]))
+        return fused_decisions
+    if decision_config == "highest_mass":
+        highest = []
+        for state in states_list:
+            if len(highest) == 0 or highest[0].mass == state.mass:
+                highest.append(state)
+            elif highest[0].mass < state.mass:
+                highest = [state]
+        # TODO  Think about something more creative in accurate in this scenario than just
+        #       returning the first element
+        return highest[0]
+    if decision_config == "highest_belief" or decision_config == "highest_plausibility":
+        highest = []
+        for state in states_list:
+            if len(highest) == 0 or highest[0].mass == state.mass:
+                highest.append(state)
+            elif highest[0].mass < state.mass:
+                highest = [state]
+        fused_states = []
+        for node in highest:
+            fused_states += node.states
+        fused_mass = highest[0].mass * len(highest) if returned_mass_is_a_fusion else highest[0].mass
+        fused_decisions = StateMeasured(fused_states, fused_mass, "/".join([x.friendly_name for x in highest]))
+        return fused_decisions
+
+
+
+
 
 
 #################################
