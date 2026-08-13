@@ -37,7 +37,7 @@ class AccuracyCounter:
             return dict({
                 "including correct" : self.results_including_correct / self.total_cases,
                 "only correct" : self.results_only_correct / self.total_cases,
-                "correct parts" : self.results_correct_parts,
+                "correct parts" : self.results_correct_parts / self.total_cases,
                 "total cases" : self.total_cases
             })
         else:
