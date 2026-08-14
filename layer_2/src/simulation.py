@@ -120,7 +120,9 @@ class Simulation:
         for state_name in states_counters.keys():
             results_dict[state_name] = states_counters[state_name].return_metrics()
         if not return_all_logs:
-            return results_dict
+            return {
+                "results" : results_dict
+            }
         else:
             return {
                 "results" : results_dict,

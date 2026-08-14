@@ -79,25 +79,27 @@ def main_case_01(fusion_methods : list[str] = None, iterations : int = 1000, ret
     sensor_type1_unit3 = ScalarSensor("Type1_003", mock_measure_scalar_1, 0.1, 10, labels, conditional_probabilites_matrix)
     type1_sensors = [sensor_type1_unit1, sensor_type1_unit2, sensor_type1_unit3]
 
+    output = dict()
+
     for method in fusion_methods:
         simulation = Simulation(method, library[method], env, type1_sensors)
         sim_output = simulation.run_accuracy(iterations=iterations, return_all_logs=return_all_logs)
+        results = sim_output["results"]
         if return_all_logs:
-            results = sim_output["results"]
             all_logs = sim_output["all_logs"]
-        else:
-            results = sim_output
 
-    total_cases = results["TOTAL"]["total cases"]
-    output = deepcopy(sim_output)
-    if verbose:
-        print("Cases: ", total_cases)
-        print("TOTAL RESULTS:")
-        del results["TOTAL"]["total cases"]
-        for key in results["TOTAL"].keys():
-            print(f"{key:<20} {results['TOTAL'][key] * 100:>6.2f}%")
-        print("STATE SPECIFIC")
-        del results["TOTAL"]
-        for key in results.keys():
-            print(f"case {key} == {results[key]}")
+        output[method] = deepcopy(sim_output)
+
+        total_cases = results["TOTAL"]["total cases"]
+        output = deepcopy(sim_output)
+        if verbose:
+            print("Cases: ", total_cases)
+            print("TOTAL RESULTS:")
+            del results["TOTAL"]["total cases"]
+            for key in results["TOTAL"].keys():
+                print(f"{key:<20} {results['TOTAL'][key] * 100:>6.2f}%")
+            print("STATE SPECIFIC")
+            del results["TOTAL"]
+            for key in results.keys():
+                print(f"case {key} == {results[key]}")
     return output
