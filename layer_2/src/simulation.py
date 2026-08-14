@@ -1,5 +1,5 @@
 from src.environment import Environment
-from src.sensor import Sensor
+from src.sensor import Sensor, SensorOutputDict
 from src.states import State, StateMeasured
 
 import logging
@@ -64,21 +64,40 @@ class Simulation:
         self.env = deepcopy(environment)
         self.sensors = deepcopy(sensors)
 
-    def fusion(self, sensor_outputs) -> StateMeasured:
+    def fusion(self, sensor_outputs : list[SensorOutputDict]) -> StateMeasured:
         states = self.env.get_env_states()
         return self.fusion_method(sensor_outputs, states)
     
-    def run_accuracy(self, iterations : int = 100):
+    def run_accuracy(self, iterations : int = 100, return_all_logs : bool = False):
         main_counter = AccuracyCounter(total_cases=iterations)
         states_counters = dict()
         for state in self.env.states:
             states_counters[state.name] = AccuracyCounter(name=state.name)
+
+        if return_all_logs:
+            all_logs = []
         
         for i in range(iterations):
             current_state = self.env.get_current_state()
             states_counters[current_state.name].add_to_total_cases()
             results = [x.get_measurements_dict(self.env) for x in self.sensors]
+
+            if return_all_logs:
+                all_logs_item = dict()
+                all_logs_item["real_state"] = current_state.name
+                all_logs_item["sensors"] = {}
+                for r in results:
+                    sensor_probs = dict()
+                    for response in r.results:
+                        sensor_probs[response.friendly_name] = response.mass
+                    all_logs_item["sensors"][r.sensor.name] = sensor_probs
+
             final_decision = self.fusion(results)
+
+            if return_all_logs:
+                all_logs_item["fused_decision"] = (final_decision.friendly_name, final_decision.mass)
+                all_logs.append(all_logs_item)
+
             if len(final_decision.states) == 1 and \
                 final_decision.states[0].name == current_state.name:
                 main_counter.add_to_results_correct_parts(1.0)
@@ -95,9 +114,15 @@ class Simulation:
                     states_counters[current_state.name].add_to_results_including_correct()
                     states_counters[current_state.name].add_to_results_correct_parts(1 / len(final_decision.states))
             self.env.change_state()
-        
+
         results_dict = dict()
         results_dict["TOTAL"] = main_counter.return_metrics()
         for state_name in states_counters.keys():
             results_dict[state_name] = states_counters[state_name].return_metrics()
-        return results_dict
+        if not return_all_logs:
+            return results_dict
+        else:
+            return {
+                "results" : results_dict,
+                "all_logs" : all_logs
+            }

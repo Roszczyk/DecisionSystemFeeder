@@ -50,7 +50,7 @@ def mock_measure_scalar_1(environment : Environment):
 
 # Type 1 sensors measured states and labels thresholds
 states_measured = [
-    StateMeasured([states[0], states[1]], 0, "AvB"),
+    StateMeasured([states[0], states[1]], 0, "A/B"),
     StateMeasured([states[2]], 0, "C"),
     StateMeasured([states[3]], 0, "D")
 ]
@@ -87,7 +87,8 @@ fusion_library = FusionLibrary().methods
 for method in fusion_library.keys():
     print(f"=== METHOD = {method:<20} ===")
     simulation = Simulation(method, fusion_library[method], env, type1_sensors)
-    results = simulation.run_accuracy()
+    results_raw = simulation.run_accuracy(return_all_logs=True)
+    results = results_raw["results"]
     total_cases = results["TOTAL"]["total cases"]
     results_copy = deepcopy(results)        # I don't know yet but maybe it will be necessary to save to file or sth
     print("Cases: ", total_cases)
@@ -99,5 +100,6 @@ for method in fusion_library.keys():
     del results["TOTAL"]
     for key in results.keys():
         print(f"case {key} == {results[key]}")
+    print(results_raw["all_logs"])
 
     
