@@ -173,3 +173,37 @@ class ComputerVision(Sensor):
 
     def get_states_probabilities(self, environment : Environment) -> list[StateMeasured]:
         return self.analyze_bounding_boxes(self.get_bounding_boxes(environment))
+
+################################
+#######  SIMPLE SENSOR   #######
+################################
+# Simple Sensor is a sensor that has a static mistake probability and returns just one decision
+
+class SimpleSensor(Sensor):
+    def __init__(self, name : str, states_drafts : list[StateMeasured],
+                measurement_function : function[[Environment], StateMeasured],      # function should return just one chosen state without probability
+                sensor_static_mistake_probability : float,                          # this should be the static probability that the sensor makes mistake
+                                                                                    # should be kept below 0.5 for good performance, but validation allows [0,1]
+                conditional_probabilities : ConditionalProbabilitiesMatrix = None):
+        assert sensor_static_mistake_probability >= 0 and sensor_static_mistake_probability <= 1, "Probability needs to be within [0,1]"
+        super().__init__(name, states_drafts, 
+                         conditional_probabilities=conditional_probabilities)
+        self.measurement_function = measurement_function
+        self.true_probability = 1.0 - sensor_static_mistake_probability
+        self.false_probability = sensor_static_mistake_probability
+
+    def measure(self, environment : Environment) -> StateMeasured:
+        return self.measurement_function(environment)
+
+    def get_states_probabilities(self, environment : Environment) -> list[StateMeasured]:
+        measurement = self.measure(environment)
+        states_table = dict()
+        not_chosen_states = []
+        for state in environment.states:
+            if state.name not in [x.name for x in measurement.states]:
+                not_chosen_states.append(state)
+        for state in measurement.states:
+            states_table[state] = True
+        chosen_state = StateMeasured(measurement.states, self.true_probability, "/".join([x.name for x in measurement.states]))
+        not_chosen_state = StateMeasured(not_chosen_states, 1.0 - self.false_probability, "/".join([x.name for x in not_chosen_states]))
+        return [chosen_state, not_chosen_state]
