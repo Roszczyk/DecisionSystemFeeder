@@ -139,36 +139,37 @@ class ScalarSensor(Sensor):
             result.append(deepcopy(label.state))
         return result
     
+################################
+####### COMPUTER VISION  #######
+################################
+# Computer Vision sensors use CV models to detect objects
 
-# TESTING 
+class BoundingBox:
+    def __init__(self, x1, y1, x2, y2, confidence, class_id):
+        self.coords1 = [x1,y1]
+        self.coords2 = [x2,y2]
+        self.confidence = confidence
+        self.cls = class_id
 
-if __name__ == "__main__":
-    states = [
-        State("X", 0.4), 
-        State("Y", 0.6)
-    ]
-    measured_states = [
-        StateMeasured(states, 0, "XvY"),
-        StateMeasured([states[0]], 0, "X"),
-        StateMeasured([states[1]], 0, "Y")
-    ]
-    conditional_probs = [
-        ConditionalProbability(states[0], measured_states[0], 0.4),
-        ConditionalProbability(states[1], measured_states[0], 0.3),
-        ConditionalProbability(states[0], measured_states[1], 0.5),
-        ConditionalProbability(states[1], measured_states[1], 0.6),
-        ConditionalProbability(states[0], measured_states[2], 0.1),
-        ConditionalProbability(states[1], measured_states[2], 0.1)
-    ]
-    matrix = ConditionalProbabilitiesMatrix(states, measured_states, conditional_probs)
+    def calculate_area(self):
+        x_vec = abs(self.coords1[0] - self.coords2[0])
+        y_vec = abs(self.coords1[1] - self.coords2[1])
+        return x_vec * y_vec
 
-    print(matrix.get_value(states[0],measured_states[0]).value)
-    print(matrix.get_value_by_friendly_name("X", "XvY").value)
+class ComputerVision(Sensor):
+    def __init__(self, name : str, acquire_bounding_boxes : function[[Environment], list[BoundingBox]], 
+                 analyze_bounding_boxes : function[[list[BoundingBox]], list[StateMeasured]], 
+                 states : list[StateMeasured]):
+        super().__init__(name, states)
+        # measurement
+        self.acquire_bb = acquire_bounding_boxes
+        self.analyze_bb = analyze_bounding_boxes
 
-    array_for_helper = [
-        [0.4, 0.5, 0.1],
-        [0.3, 0.6, 0.1]
-    ]
-    matrix2 = conditional_probabilities_matrix_helper(array_for_helper, states, measured_states)
-    print(matrix2.get_value(states[0],measured_states[0]).value)
-    print(matrix2.get_value_by_friendly_name("X", "XvY").value)
+    def get_bounding_boxes(self, environment : Environment) -> list[BoundingBox]:
+        return self.acquire_bb(environment)
+
+    def analyze_bounding_boxes(self, bounding_boxes : list[BoundingBox]) -> list[StateMeasured]:
+        return self.analyze_bb(bounding_boxes)
+
+    def get_states_probabilities(self, environment : Environment) -> list[StateMeasured]:
+        return self.analyze_bounding_boxes(self.get_bounding_boxes(environment))
