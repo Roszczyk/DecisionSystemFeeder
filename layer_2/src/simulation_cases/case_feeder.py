@@ -53,7 +53,21 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
     ]
     all_sensors += movement_sensors
 
-    # TODO Vibration sensors (ScalarSensor)
+    # TODO vibration sensors (ScalarSensor)
+    def vibrations_measure(state : State, previous_value : float):      # values 0-20   
+        if previous_value > 2.0 and state.name == "idle":
+            random_diff = random.random() * 10
+            value = max(0.0, previous_value - random_diff)
+        elif previous_value <= 2.0 and state.name == "idle":
+            random_diff = random.random() * 2 - 1.0
+            value = previous_value + random_diff
+        elif "detected" in state.name:
+            random_diff = random.random() * 20
+            value = min(previous_value + random_diff, 20.0)
+        return value
+    env.add_metric(Metric("vibrations", vibrations_measure, 1.0))
+
+
     # TODO Climate sensors (ScalarSensor)
     # TODO Camera sensors (ComputerVision)
 
