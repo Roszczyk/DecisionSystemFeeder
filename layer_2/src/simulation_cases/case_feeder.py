@@ -33,7 +33,7 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
     movement_metric_func = lambda s,p: ("detected" in s.name)
     env.add_metric(Metric("movement", movement_metric_func, False))
 
-    movement_sensor_states_measured_possible = [
+    simplest_sensor_states_measured_possible = [
         StateMeasured([states[0], states[1]], friendly_name="movement_detected"),
         StateMeasured([states[2]], friendly_name="idle")
     ]
@@ -41,14 +41,14 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
     def movement_func(env : Environment, correctness_probability : float) -> StateMeasured:
         is_moving = env.measure_metric("movement")
         measured_moving = is_moving and random.random() <= correctness_probability
-        return movement_sensor_states_measured_possible[0] if measured_moving else movement_sensor_states_measured_possible[1]
+        return simplest_sensor_states_measured_possible[0] if measured_moving else simplest_sensor_states_measured_possible[1]
 
     movement_sensors = [
-        SimpleSensor("01_movement_sensor_good", movement_sensor_states_measured_possible, lambda e: movement_func(e, 0.95), 
+        SimpleSensor("01_movement_sensor_good", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0.95), 
                      0.95, None),
-        SimpleSensor("02_movement_sensor", movement_sensor_states_measured_possible, lambda e: movement_func(e, 0.85), 
+        SimpleSensor("02_movement_sensor", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0.85), 
                      0.85, None),
-        SimpleSensor("03_movement_sensor_poor", movement_sensor_states_measured_possible, lambda e: movement_func(e, 0,7),
+        SimpleSensor("03_movement_sensor_poor", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0,7),
                      0.7, None)     # TODO To run Bayes, I need to prepare conditional_probabilities
     ]
     all_sensors += movement_sensors
@@ -66,6 +66,15 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
             value = min(previous_value + random_diff, 20.0)
         return value
     env.add_metric(Metric("vibrations", vibrations_measure, 1.0))
+
+    def vibrations_sensor_func(environment : Environment):
+        vibrations_val = environment.measure_metric("vibrations")
+        if vibrations_val > 5.0:
+            return simplest_sensor_states_measured_possible[0]
+        else:
+            return simplest_sensor_states_measured_possible[1]
+
+    # TODO add sensors
 
 
     # TODO Climate sensors (ScalarSensor)
