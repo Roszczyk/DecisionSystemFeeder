@@ -8,6 +8,7 @@ class FusionLibrary:
             "simple voting" : fusion_simple_voting,
             "cumulative voting" : fusion_cumulative_voting,
             "approval voting" : fusion_approval_voting,
+            "bordy voting" : fusion_bordy_voting,
             "DST belief interval with belief focus" : (lambda x,y: fusion_with_dempster_shafer(x,y,"belief_interval_belief_focus")),
             "DST belief interval with plausibility focus" : (lambda x,y: fusion_with_dempster_shafer(x,y,"belief_interval_plausibility_focus")),
             "DST belief" : (lambda x,y: fusion_with_dempster_shafer(x,y,"highest_belief")),
@@ -315,3 +316,38 @@ def fusion_approval_voting(sensor_outputs : list[SensorOutputDict],
     name = name.rstrip("/")
     final_decision = StateMeasured(temp, mass, name)
     return final_decision
+
+
+def fusion_bordy_voting(sensor_outputs : list[SensorOutputDict],
+                        environment_states : list[State]) -> StateMeasured:
+    # prepare the dict for scores collection
+    states_scores = {state.name : 0 for state in environment_states}
+    # sort the preferences and assign scores to states
+    for so in sensor_outputs:
+        temp_sorting_dict = dict()
+        for r in so.results:
+            temp_sorting_dict[r.mass] = r
+        temp_list_sorting = list(temp_sorting_dict.keys())
+        temp_list_sorting.sort()
+        temp_list_sorting = temp_list_sorting[::-1]
+        points_to_assign = len(environment_states)
+        for score in temp_list_sorting:
+            current_states = temp_sorting_dict[score]
+            for state in current_states.states:
+                states_scores[state.name] += points_to_assign
+            points_to_assign -= len(current_states.states)
+    # choose the highest state
+    final_decision_list = []
+    for state in environment_states:
+        if len(final_decision_list) == 0 or \
+                states_scores[final_decision_list[0].name] == states_scores[state.name]:
+            final_decision_list.append(state)
+        elif states_scores[final_decision_list[0].name] > states_scores[state.name]:
+            continue
+        elif states_scores[final_decision_list[0].name] < states_scores[state.name]:
+            final_decision_list = [state]
+    # calculate and assign the mass to the decision
+    max_possible_score = len(sensor_outputs) * len(environment_states)
+    final_state_mass = states_scores[final_decision_list[0].name] / max_possible_score
+    # return StateMeasured
+    return StateMeasured(final_decision_list, final_state_mass)

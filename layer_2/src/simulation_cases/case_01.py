@@ -82,6 +82,7 @@ def main_case_01(fusion_methods : list[str] = None, iterations : int = 1000, ret
     output = dict()
 
     for method in fusion_methods:
+        print(method)
         simulation = Simulation(method, library[method], env, type1_sensors)
         sim_output = simulation.run_accuracy(iterations=iterations, return_all_logs=return_all_logs)
         results = sim_output["results"]
