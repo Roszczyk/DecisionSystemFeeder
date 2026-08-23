@@ -53,8 +53,8 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
     ]
     all_sensors += movement_sensors
 
-    # TODO vibration sensors (ScalarSensor)
-    def vibrations_measure(state : State, previous_value : float):      # values 0-20   
+    # vibration sensors (ScalarSensor)
+    def vibrations_metric_set(state : State, previous_value : float):      # values 0-20   
         if previous_value > 2.0 and state.name == "idle":
             random_diff = random.random() * 10
             value = max(0.0, previous_value - random_diff)
@@ -65,16 +65,21 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
             random_diff = random.random() * 20
             value = min(previous_value + random_diff, 20.0)
         return value
-    env.add_metric(Metric("vibrations", vibrations_measure, 1.0))
+    env.add_metric(Metric("vibrations", vibrations_metric_set, 1.0))
 
     def vibrations_sensor_func(environment : Environment):
         vibrations_val = environment.measure_metric("vibrations")
-        if vibrations_val > 5.0:
-            return simplest_sensor_states_measured_possible[0]
-        else:
-            return simplest_sensor_states_measured_possible[1]
+        return vibrations_val
 
-    # TODO add sensors
+    vibration_labels = [
+        LabelThreshold(simplest_sensor_states_measured_possible[0], 7.0, 20.0),
+        LabelThreshold(simplest_sensor_states_measured_possible[1], 0.0, 7.0)
+    ]
+    vibrations_sensors = [
+        ScalarSensor("04_vibrations_good", vibrations_sensor_func, 0.05, 0.1, vibration_labels),
+        ScalarSensor("05_vibrations_poor", vibrations_sensor_func, 0.2, 0.5, vibration_labels)
+    ]
+    all_sensors += vibrations_sensors
 
 
     # TODO Climate sensors (ScalarSensor)
