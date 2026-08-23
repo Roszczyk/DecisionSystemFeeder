@@ -1,6 +1,8 @@
 from src.states import StateMeasured, State
 from src.sensor import SensorOutputDict
 
+from copy import deepcopy
+
 class FusionLibrary:
     def __init__(self):
         self.methods = dict({
@@ -8,7 +10,8 @@ class FusionLibrary:
             "simple voting" : fusion_simple_voting,
             "cumulative voting" : fusion_cumulative_voting,
             "approval voting" : fusion_approval_voting,
-            "bordy voting" : fusion_bordy_voting,
+            "borda voting" : fusion_borda_voting,
+            "nanson voting" : fusion_nanson_voting,
             "DST belief interval with belief focus" : (lambda x,y: fusion_with_dempster_shafer(x,y,"belief_interval_belief_focus")),
             "DST belief interval with plausibility focus" : (lambda x,y: fusion_with_dempster_shafer(x,y,"belief_interval_plausibility_focus")),
             "DST belief" : (lambda x,y: fusion_with_dempster_shafer(x,y,"highest_belief")),
@@ -318,25 +321,44 @@ def fusion_approval_voting(sensor_outputs : list[SensorOutputDict],
     return final_decision
 
 
-def fusion_bordy_voting(sensor_outputs : list[SensorOutputDict],
+def get_borda_ranking(sensor_outputs: list[SensorOutputDict],
+                environment_states: list[State]) -> dict:
+    states_scores = {state.name: 0 for state in environment_states}
+    num_states = len(environment_states)
+    for sensor_output in sensor_outputs:
+        sorted_results = sorted(
+            sensor_output.results,
+            key=lambda r: r.mass,
+            reverse=True
+        )
+        current_position = 0
+        for result in sorted_results:
+            # Keep only states which are still available
+            available_states = [
+                state
+                for state in result.states
+                if state.name in states_scores
+            ]
+            # Ignore results which contain no available states
+            if not available_states:
+                continue
+            num_tied_states = len(available_states)
+            first_position = current_position
+            last_position = current_position + num_tied_states - 1
+            first_score = num_states - first_position - 1
+            last_score = num_states - last_position - 1
+            average_score = (first_score + last_score) / 2
+            for state in available_states:
+                states_scores[state.name] += average_score
+            current_position += num_tied_states
+    return states_scores
+
+
+def fusion_borda_voting(sensor_outputs : list[SensorOutputDict],
                         environment_states : list[State]) -> StateMeasured:
-    # prepare the dict for scores collection
-    states_scores = {state.name : 0 for state in environment_states}
-    # sort the preferences and assign scores to states
-    for so in sensor_outputs:
-        temp_sorting_dict = dict()
-        for r in so.results:
-            temp_sorting_dict[r.mass] = r
-        temp_list_sorting = list(temp_sorting_dict.keys())
-        temp_list_sorting.sort()
-        temp_list_sorting = temp_list_sorting[::-1]
-        points_to_assign = len(environment_states)
-        for score in temp_list_sorting:
-            current_states = temp_sorting_dict[score]
-            for state in current_states.states:
-                states_scores[state.name] += points_to_assign
-            points_to_assign -= len(current_states.states)
-    # choose the highest state
+    # get the scores for the states
+    states_scores = get_borda_ranking(sensor_outputs, environment_states)
+    # choose the highest scoring state
     final_decision_list = []
     for state in environment_states:
         if len(final_decision_list) == 0 or \
@@ -351,3 +373,50 @@ def fusion_bordy_voting(sensor_outputs : list[SensorOutputDict],
     final_state_mass = states_scores[final_decision_list[0].name] / max_possible_score
     # return StateMeasured
     return StateMeasured(final_decision_list, final_state_mass)
+
+
+def fusion_nanson_voting(sensor_outputs : list[SensorOutputDict],
+                        environment_states : list[State]):
+    # keep the sum of all scores assigned to the states
+    scores_sum_keeper = {state.name : 0 for state in environment_states}
+    num_of_iterations = 0
+    highest_possible_scores_sum = 0
+    # in each borda voting iteration, eliminate lowest score
+    stop_condition = False
+    current_available_states = deepcopy(environment_states)
+    while not stop_condition:
+        # get the scores for the states
+        states_scores = get_borda_ranking(sensor_outputs, current_available_states)
+        # keep the sum of scores to calculate mass later
+        num_of_iterations += 1
+        highest_possible_scores_sum += (len(current_available_states)-1) * len(sensor_outputs)
+        for state in states_scores.keys():
+            scores_sum_keeper[state] += states_scores[state]
+        # check if scores differ 
+        if len(set(states_scores.values())) == 1:
+            stop_condition = True
+            continue
+        # eliminate the lowest score
+        lowest_score = []
+        for state in current_available_states:
+            if len(lowest_score) == 0 or \
+                    states_scores[lowest_score[0].name] == states_scores[state.name]:
+                lowest_score.append(state)
+            elif states_scores[lowest_score[0].name] < states_scores[state.name]:
+                continue
+            elif states_scores[lowest_score[0].name] > states_scores[state.name]:
+                lowest_score = [state]
+        new_current_available_states = []
+        for state in current_available_states:
+            if state.name in [s.name for s in lowest_score]:
+                continue
+            else:
+                new_current_available_states.append(state)
+        current_available_states = new_current_available_states
+    # prepare the output 
+    final_decision_list = []
+    all_states_dict = {s.name : s for s in environment_states}
+    for s_name in states_scores.keys():
+        final_decision_list.append(all_states_dict[s_name])
+    assigned_mass = scores_sum_keeper[final_decision_list[0].name] / highest_possible_scores_sum
+    return StateMeasured(final_decision_list, assigned_mass)
