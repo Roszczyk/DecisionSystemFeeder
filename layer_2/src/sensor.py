@@ -121,10 +121,11 @@ class ScalarSensor(Sensor):
         self.labels_thresholds = labels_thresholds
 
     def calculate_uncertainty(self, measured_value):
-        return measured_value * self.uncertainty_relative + self.uncertainty_absolute
+        return abs(measured_value) * self.uncertainty_relative + self.uncertainty_absolute
     
     def gauss_probability(self, value, uncertainty, label_threshold : LabelThreshold):
         # Z = N(value, uncertainty^2)
+        assert uncertainty > 0, f"uncertainty must be a positive number - {uncertainty}<=0"
         p = norm.cdf(label_threshold.upper, loc=value, scale=uncertainty) \
             - norm.cdf(label_threshold.lower, loc=value, scale=uncertainty)
         return float(p)
@@ -140,6 +141,7 @@ class ScalarSensor(Sensor):
             probability = self.gauss_probability(measurement, uncertainty, label)
             label.state.mass = probability
             result.append(deepcopy(label.state))
+        assert int(round(result[0].mass + result[1].mass)) == 1, round(result[0].mass + result[1].mass)
         return result
     
 ################################
