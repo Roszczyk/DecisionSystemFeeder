@@ -42,18 +42,14 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
     def movement_func(env : Environment, correctness_probability : float) -> StateMeasured:
         is_moving = env.measure_metric("movement")
         measured_moving = is_moving and random.random() <= correctness_probability
-        is_moving_state = deepcopy(simplest_sensor_states_measured_possible[0])
-        is_not_moving_state = deepcopy(simplest_sensor_states_measured_possible[1])
-        is_moving_state.mass = correctness_probability if measured_moving else 1.0 - correctness_probability
-        is_not_moving_state.mass = correctness_probability if not measured_moving else 1.0 - correctness_probability
-        return [is_moving_state, is_not_moving_state]
+        return simplest_sensor_states_measured_possible[0] if measured_moving else simplest_sensor_states_measured_possible[1]
 
     movement_sensors = [
         SimpleSensor("01_movement_sensor_good", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0.95), 
                      0.95, None),
         SimpleSensor("02_movement_sensor", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0.85), 
                      0.85, None),
-        SimpleSensor("03_movement_sensor_poor", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0,7),
+        SimpleSensor("03_movement_sensor_poor", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0.7),
                      0.7, None)     # TODO To run Bayes, I need to prepare conditional_probabilities
     ]
     all_sensors += movement_sensors
@@ -76,9 +72,10 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
         vibrations_val = environment.measure_metric("vibrations")
         return vibrations_val
 
+    import math
     vibration_labels = [
-        LabelThreshold(simplest_sensor_states_measured_possible[0], 7.0, 20.0),
-        LabelThreshold(simplest_sensor_states_measured_possible[1], 0.0, 7.0)
+        LabelThreshold(simplest_sensor_states_measured_possible[0], 7.0, math.inf),
+        LabelThreshold(simplest_sensor_states_measured_possible[1], -math.inf, 7.0)
     ]
     vibrations_sensors = [
         ScalarSensor("04_vibrations_good", vibrations_sensor_func, 0.05, 0.1, vibration_labels),
@@ -86,7 +83,7 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
     ]
     all_sensors += vibrations_sensors
 
-    # TODO Camera sensors (ComputerVision)
+    # Camera sensors (ComputerVision)
     cv_states_possible = [
         StateMeasured([states[0]], friendly_name="bird"),
         StateMeasured([states[1], states[2]], friendly_name="no bird")
@@ -146,7 +143,27 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
     ]
     all_sensors += cv_sensors
 
+    # Run simulation
+    output = dict()
 
+    for method in fusion_methods:
+        print("### METHOD:", method)
+        simulation = Simulation(method, library[method], env, all_sensors)
+        sim_output = simulation.run_accuracy(iterations=iterations, return_all_logs=return_all_logs)
+        results = sim_output["results"]
 
+        output[method] = deepcopy(sim_output)
 
-    # TODO Run simulation
+        total_cases = results["TOTAL"]["total cases"]
+        output = deepcopy(sim_output)
+        if verbose:
+            print("Cases: ", total_cases)
+            print("TOTAL RESULTS:")
+            del results["TOTAL"]["total cases"]
+            for key in results["TOTAL"].keys():
+                print(f"{key:<20} {results['TOTAL'][key] * 100:>6.2f}%")
+            print("STATE SPECIFIC")
+            del results["TOTAL"]
+            for key in results.keys():
+                print(f"case {key} == {results[key]}")
+    return output
