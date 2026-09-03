@@ -8,3 +8,5 @@ if __name__ == "__main__":
     run_methods = list(FusionLibrary().methods.keys())
     run_methods.remove("classical Bayes")
     main_feeder_simulation(run_methods)
+    print("Simulation CASE 01")
+    main_case_01(["nanson voting"])

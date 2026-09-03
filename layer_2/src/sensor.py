@@ -76,6 +76,9 @@ class ConditionalProbabilitiesMatrix:
     
 def conditional_probabilities_matrix_helper(probs_as_list : list[list[float]], real_states : list[State],
                                             measured_states : list[StateMeasured]):
+    """
+    probs_as_list - rows = real states, columns = states measured
+    """
     temp_list = []
     assert len(probs_as_list) == len(real_states), \
         f"matrix rows ({len(probs_as_list)}) and number of states ({len(real_states)}) are not equal"
@@ -206,6 +209,6 @@ class SimpleSensor(Sensor):
                 not_chosen_states.append(state)
         for state in measurement.states:
             states_table[state] = True
-        chosen_state = StateMeasured(measurement.states, self.true_probability, "/".join([x.name for x in measurement.states]))
-        not_chosen_state = StateMeasured(not_chosen_states, 1.0 - self.false_probability, "/".join([x.name for x in not_chosen_states]))
+        chosen_state = StateMeasured(measurement.states, self.true_probability)
+        not_chosen_state = StateMeasured(not_chosen_states, 1.0 - self.false_probability)
         return [chosen_state, not_chosen_state]
