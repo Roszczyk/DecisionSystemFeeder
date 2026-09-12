@@ -7,8 +7,13 @@ from pathlib import Path
 import json
 from time import sleep
 import copy
+import sys
 
-from processing import process_ir_frame
+sys.path.append(
+    str(Path(__file__).parent.parent.parent / "layer_1/CV_InfraredCamera")
+)
+
+from infrared_utils import process_ir_frame
 
 def get_camera_config(config_file):
     with open(config_file) as f:
