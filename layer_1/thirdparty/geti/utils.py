@@ -10,28 +10,28 @@ import numpy as np
 from model_api.models import Model
 from model_api.visualizer import Visualizer
 
-HERE = Path(__file__).resolve().parent
-MODEL_PATH = HERE / "model.xml"
-IMAGE_PATH = HERE / "image.jpg"
-OUTPUT_PATH = HERE / "result.jpg"
+# HERE = Path(__file__).parent.resolve()
+# MODEL_PATH = HERE / "model.xml"
+# IMAGE_PATH = HERE / "image.jpg"
+# OUTPUT_PATH = HERE / "result.jpg"
 
-if not MODEL_PATH.exists():
-    raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
-if not IMAGE_PATH.exists():
-    raise FileNotFoundError(f"Sample image not found:{IMAGE_PATH}")
-
-
-def load_model() -> Model:
-    print(f"Loading model from {MODEL_PATH}...")
-    return Model.create_model(str(MODEL_PATH))
+# if not MODEL_PATH.exists():
+#     raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
+# if not IMAGE_PATH.exists():
+#     raise FileNotFoundError(f"Sample image not found:{IMAGE_PATH}")
 
 
-def load_image() -> cv2.Mat:
-    print(f"Loading image from {IMAGE_PATH}...")
+def load_model(model_path) -> Model:
+    print(f"Loading model from {model_path}...")
+    return Model.create_model(str(model_path))
+
+
+def load_image(image_path) -> cv2.Mat:
+    print(f"Loading image from {image_path}...")
     # IMREAD_UNCHANGED preserves the original bit depth (e.g. 16-bit PNG/TIFF images).
-    image_raw = cv2.imread(str(IMAGE_PATH), cv2.IMREAD_UNCHANGED)
+    image_raw = cv2.imread(str(image_path), cv2.IMREAD_UNCHANGED)
     if image_raw is None:
-        raise RuntimeError(f"Failed to decode image: {IMAGE_PATH}")
+        raise RuntimeError(f"Failed to decode image: {image_path}")
 
     # Add explicit channel dimension for 2D grayscale: (H, W) -> (H, W, 1)
     if image_raw.ndim == 2:
@@ -44,7 +44,7 @@ def load_image() -> cv2.Mat:
     return image_raw
 
 
-def visualise_result(image, result) -> None:
+def visualise_result(image, result, output_path) -> None:
     if image.dtype != np.uint8:
         image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
@@ -52,6 +52,6 @@ def visualise_result(image, result) -> None:
     
     display_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     output = Visualizer().render(display_image, result)
-    cv2.imwrite(str(OUTPUT_PATH), output)
-    print(f"Saved annotated result to {OUTPUT_PATH}")
+    cv2.imwrite(str(output_path), output)
+    print(f"Saved annotated result to {output_path}")
 
