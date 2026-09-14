@@ -9,8 +9,11 @@ from time import sleep
 import copy
 import sys
 
+MAIN_REPOSITORY_DIR = Path(__file__).parent.parent.parent
+LAYER1_CONTEXT_DIR = MAIN_REPOSITORY_DIR / "layer_1"
+
 sys.path.append(
-    str(Path(__file__).parent.parent.parent / "layer_1/CV_InfraredCamera")
+    str(LAYER1_CONTEXT_DIR / "CV_InfraredCamera")
 )
 
 from infrared_utils import process_ir_frame
@@ -38,7 +41,7 @@ SAVE_DIR = Path(__file__).parent / "birds"
 COOLDOWN = 60
 CONF_THRESHOLD = 0.5
 
-config = get_camera_config(Path(__file__).parent / "config.json")
+config = get_camera_config(LAYER1_CONTEXT_DIR / "config.json")
 CAMERA_RGB = config["RGBCAM"]
 CAMERA_IR = config["IRCAM"]
 CAMERA_RGB_2 = config["RGBCAM2"]

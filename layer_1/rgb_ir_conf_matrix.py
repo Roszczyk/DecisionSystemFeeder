@@ -7,7 +7,6 @@ from pathlib import Path
 import json
 from time import sleep
 import copy
-from __future__ import annotations
 
 from CV_InfraredCamera.infrared_utils import process_ir_frame
 from thirdparty.geti.utils import load_model, visualise_result
