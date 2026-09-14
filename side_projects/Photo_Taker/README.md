@@ -13,3 +13,16 @@ pip install -r requirements.txt
 ```bash
 python main.py
 ```
+
+### Output
+
+As an output you should get the set of pictures:
+ - RGB1 camera photos
+ - RGB1 camera photos with bounding boxes 
+ - bounding boxes described in txt file
+ - RGB1 camera photos
+ - IR camera photos
+
+### Aftermath
+
+The IR photos dataset was used to train [Infrared_Bird_Detection](https://huggingface.co/Roszczyk/Infrared_Bird_Detection/tree/main) model. The dataset was annotated and the model was trained using [Intel Geti](https://docs.geti.intel.com/) software. The model was based on YOLO architecture. 
