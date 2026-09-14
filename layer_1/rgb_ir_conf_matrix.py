@@ -35,7 +35,7 @@ COOLDOWN = 60
 CONF_THRESHOLD = 0.5
 start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
-IR_MODEL_PATH = Path(__file__).parent / "CV_InfraredCamera/ir_birds_detection_ver1.xml"
+IR_MODEL_PATH = Path(__file__).parent / "CV_InfraredCamera/Infrared_Bird_Detection/ir_birds_detection_ver1.xml"
 CONF_MATRIX_FILE = Path(__file__).parent / f"ir_confusion_matrix_{start_time}.txt"
 
 config = get_camera_config(Path(__file__).parent / "config.json")
