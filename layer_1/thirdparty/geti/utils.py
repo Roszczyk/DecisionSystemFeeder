@@ -48,10 +48,10 @@ def visualise_result(image, result, output_path) -> None:
     if image.dtype != np.uint8:
         image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 
-    Visualizer().show(image, result)
+    # Visualizer().show(image, result)
     
     display_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     output = Visualizer().render(display_image, result)
-    cv2.imwrite(str(output_path), output)
-    print(f"Saved annotated result to {output_path}")
-
+    # cv2.imwrite(str(output_path), output)
+    # print(f"Saved annotated result to {output_path}")
+    return output
