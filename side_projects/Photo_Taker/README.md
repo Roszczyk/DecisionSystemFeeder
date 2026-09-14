@@ -25,4 +25,4 @@ As an output you should get the set of pictures:
 
 ### Aftermath
 
-The IR photos dataset was used to train [Infrared_Bird_Detection](https://huggingface.co/Roszczyk/Infrared_Bird_Detection/tree/main) model. The dataset was annotated and the model was trained using [Intel Geti](https://docs.geti.intel.com/) software. The model was based on YOLO architecture. 
+The [InfraRed_Photos_Annotated_for_Birds_Detection dataset](https://huggingface.co/datasets/Roszczyk/InfraRed_Photos_Annotated_for_Birds_Detection/tree/main) was used to train [Infrared_Bird_Detection](https://huggingface.co/Roszczyk/Infrared_Bird_Detection/tree/main) model. The dataset was annotated and the model was trained using [Intel Geti](https://docs.geti.intel.com/) software. The model was based on YOLO architecture. 
