@@ -44,7 +44,7 @@ def load_image(image_path) -> cv2.Mat:
     return image_raw
 
 
-def visualise_result(image, result, output_path) -> None:
+def visualise_result(image, result) -> None:
     if image.dtype != np.uint8:
         image = cv2.normalize(image, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
 

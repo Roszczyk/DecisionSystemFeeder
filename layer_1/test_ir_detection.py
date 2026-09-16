@@ -102,7 +102,7 @@ if (ir_detected or rgb_detected) and (now - last_photo_time) > COOLDOWN:
     cv2.imwrite(img_path, frame)
     cv2.imwrite(ir_path, frame_ir)  
     if ir_detected:
-        bb_ir_frame = visualise_result(frame_ir)
+        bb_ir_frame = visualise_result(frame_ir, ir_results)
         cv2.imwrite(bb_ir_path, bb_ir_frame)
     if rgb_detected:
         cv2.imwrite(bb_img_path, frame_copy)
