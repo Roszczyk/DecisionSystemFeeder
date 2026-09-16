@@ -123,5 +123,3 @@ if (ir_detected or rgb_detected) and (now - last_photo_time) > COOLDOWN:
     print(f"📸 Saved with boxes: {bb_img_path}")
 
     last_photo_time = now
-
-cv2.destroyAllWindows()

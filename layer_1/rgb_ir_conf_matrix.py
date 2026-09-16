@@ -146,7 +146,3 @@ while True:
 
     if cv2.waitKey(1) == 27:
         break
-
-    sleep(15)
-
-cv2.destroyAllWindows()
