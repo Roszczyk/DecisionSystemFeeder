@@ -3,7 +3,7 @@ import cv2
 
 app = Flask(__name__)
 
-camera = cv2.VideoCapture(4)
+camera = cv2.VideoCapture(2)
 
 HTML = """
 <!DOCTYPE html>

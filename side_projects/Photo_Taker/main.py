@@ -81,7 +81,7 @@ while True:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         img_path = f"{SAVE_DIR}/bird_{timestamp}.jpg"
-        txt_path = f"{SAVE_DIR}/birds_{timestamp}.txt"
+        txt_path = f"{SAVE_DIR}/bird_{timestamp}.txt"
         bb_img_path = f"{SAVE_DIR}/bird_{timestamp}_bb.jpg"
         img_rgb2_path = f"{SAVE_DIR}/bird_{timestamp}_RGB2.jpg"
 
