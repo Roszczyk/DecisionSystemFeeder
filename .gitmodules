@@ -1,0 +1,3 @@
+[submodule "layer_1/CV_InfraredCamera/Infrared_Bird_Detection"]
+	path = layer_1/CV_InfraredCamera/Infrared_Bird_Detection
+	url = https://huggingface.co/Roszczyk/Infrared_Bird_Detection
