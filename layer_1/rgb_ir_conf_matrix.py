@@ -147,6 +147,3 @@ while True:
             f.write(f"Timestamp: {timestamp}")
 
         last_photo_time = now
-
-    if cv2.waitKey(1) == 27:
-        break
