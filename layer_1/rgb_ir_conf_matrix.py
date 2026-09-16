@@ -111,11 +111,12 @@ while True:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         img_path = f"{SAVE_DIR}/bird_{timestamp}.jpg"
-        txt_path = f"{SAVE_DIR}/birds_{timestamp}.txt"
+        # txt_path = f"{SAVE_DIR}/birds_{timestamp}.txt"
         bb_img_path = f"{SAVE_DIR}/bird_{timestamp}_bb.jpg"
         img_rgb2_path = f"{SAVE_DIR}/bird_{timestamp}_RGB2.jpg"
         ir_path = f"{SAVE_DIR}/bird_{timestamp}_ir.jpg"
         bb_ir_path = f"{SAVE_DIR}/bird_{timestamp}_irbb.jpg"
+        # txt_ir_path = f"{SAVE_DIR}/birds_{timestamp}_ir.txt"
 
         cv2.imwrite(img_path, frame)
         cv2.imwrite(ir_path, frame_ir)  
@@ -131,13 +132,14 @@ while True:
             if rgb2_photo is not None:
                 cv2.imwrite(img_rgb2_path, rgb2_photo)
 
-        with open(txt_path, "w") as f:
-            for name, conf, x1, y1, x2, y2 in bird_boxes:
-                f.write(f"{name} {conf:.3f} {x1} {y1} {x2} {y2}\n")
+        # with open(txt_path, "w") as f:
+        #     for name, conf, x1, y1, x2, y2 in bird_boxes:
+        #         f.write(f"{name} {conf:.3f} {x1} {y1} {x2} {y2}\n")
 
         print(f"📸 Saved: {img_path}")
-        print(f"📦 Boxes: {txt_path}")
+        # print(f"📦 Boxes: {txt_path}")
         print(f"📸 Saved IR: {ir_path}")
+        print(f"📸 Saved IR with boxes: {bb_ir_path}")
         print(f"📸 Saved with boxes: {bb_img_path}")
 
         confusion_matrix_text = f"\t RGB 1 \t RGB 0 \n IR 1 \t {ir_confusion_matrix["rgb 1 ir 1"]} \t {ir_confusion_matrix["rgb 0 ir 1"]} \n IR 0 \t {ir_confusion_matrix["rgb 1 ir 0"]} \t N/A"
