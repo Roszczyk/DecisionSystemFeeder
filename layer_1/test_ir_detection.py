@@ -53,12 +53,6 @@ last_photo_time = 0
 print("Bird detection started...")
 print("Timestamp: ", start_time)
 
-ir_confusion_matrix = {
-    "rgb 1 ir 0" : 0,
-    "rgb 0 ir 1" : 0,
-    "rgb 1 ir 1" : 0
-}
-
 rgb_detected = False
 ir_detected = False
 
@@ -90,15 +84,10 @@ if len(bird_boxes) > 0:
 
 now = time.time()
 
+print(ir_results)
+
 if 'Bird' in ir_results.label_names:
     ir_detected = True
-
-if ir_detected and rgb_detected:
-    ir_confusion_matrix["rgb 1 ir 1"] += 1
-if not ir_detected and rgb_detected:
-    ir_confusion_matrix["rgb 1 ir 0"] += 1
-if ir_detected and not rgb_detected:
-    ir_confusion_matrix["rgb 0 ir 1"] += 1
 
 if (ir_detected or rgb_detected) and (now - last_photo_time) > COOLDOWN:
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -132,14 +121,6 @@ if (ir_detected or rgb_detected) and (now - last_photo_time) > COOLDOWN:
     print(f"📦 Boxes: {txt_path}")
     print(f"📸 Saved IR: {ir_path}")
     print(f"📸 Saved with boxes: {bb_img_path}")
-
-    confusion_matrix_text = f"\t RGB 1 \t RGB 0 \n IR 1 \t {ir_confusion_matrix["rgb 1 ir 1"]} \t {ir_confusion_matrix["rgb 0 ir 1"]} \n IR 0 \t {ir_confusion_matrix["rgb 1 ir 0"]} \t N/A"
-
-    print(confusion_matrix_text)
-    with open(CONF_MATRIX_FILE, "w") as f:
-        f.write(confusion_matrix_text)
-        f.write(f"Start time: {start_time}")
-        f.write(f"Timestamp: {timestamp}")
 
     last_photo_time = now
 
