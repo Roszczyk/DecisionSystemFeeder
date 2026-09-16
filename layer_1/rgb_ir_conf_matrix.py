@@ -36,7 +36,6 @@ CONF_THRESHOLD = 0.5
 start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 IR_MODEL_PATH = Path(__file__).parent / "CV_InfraredCamera/Infrared_Bird_Detection/ir_birds_detection_ver1.xml"
-CONF_MATRIX_FILE = Path(__file__).parent / f"ir_confusion_matrix_{start_time}.txt"
 
 config = get_camera_config(Path(__file__).parent / "config.json")
 CAMERA_RGB = config["RGBCAM"]
@@ -60,6 +59,11 @@ ir_confusion_matrix = {
 }
 
 while True:
+    if datetime.now().hour >= 19 or datetime.now().hour <= 6:
+        CONF_MATRIX_FILE = Path(__file__).parent / f"ir_confusion_matrix_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_night.txt"
+    else:
+        CONF_MATRIX_FILE = Path(__file__).parent / f"ir_confusion_matrix_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_day.txt"
+
     rgb_detected = False
     ir_detected = False
 
