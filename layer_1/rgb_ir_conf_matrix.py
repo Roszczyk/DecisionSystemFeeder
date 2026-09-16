@@ -59,11 +59,14 @@ ir_confusion_matrix = {
 }
 
 while True:
-    if datetime.now().hour >= 19 or datetime.now().hour <= 6:
+    mode = None
+    if mode != "night" and (datetime.now().hour >= 19 or datetime.now().hour <= 6):
         start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        mode = "night"
         CONF_MATRIX_FILE = SAVE_DIR / f"ir_confusion_matrix_{start_time}_night.txt"
-    else:
+    elif mode != "day" and (datetime.now().hour < 19 or datetime.now().hour > 6):
         start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        mode = "day"
         CONF_MATRIX_FILE = SAVE_DIR / f"ir_confusion_matrix_{start_time}_day.txt"
 
     rgb_detected = False
