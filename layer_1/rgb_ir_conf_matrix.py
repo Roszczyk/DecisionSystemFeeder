@@ -60,9 +60,9 @@ ir_confusion_matrix = {
 
 while True:
     if datetime.now().hour >= 19 or datetime.now().hour <= 6:
-        CONF_MATRIX_FILE = Path(__file__).parent / f"ir_confusion_matrix_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_night.txt"
+        CONF_MATRIX_FILE = SAVE_DIR / f"ir_confusion_matrix_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_night.txt"
     else:
-        CONF_MATRIX_FILE = Path(__file__).parent / f"ir_confusion_matrix_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_day.txt"
+        CONF_MATRIX_FILE = SAVE_DIR / f"ir_confusion_matrix_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}_day.txt"
 
     rgb_detected = False
     ir_detected = False
