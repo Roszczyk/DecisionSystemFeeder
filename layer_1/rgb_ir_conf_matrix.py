@@ -31,7 +31,8 @@ def take_frame(cam_no, is_ir=False, rotate=False):
     return frame
 
 SAVE_DIR = Path(__file__).parent / "birds"
-COOLDOWN = 60
+COOLDOWN = 90
+SLEEP_TIME = 30
 CONF_THRESHOLD = 0.5
 start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -58,13 +59,26 @@ ir_confusion_matrix = {
     "rgb 1 ir 1" : 0
 }
 
+mode = None
 while True:
-    if datetime.now().hour >= 19 or datetime.now().hour <= 6:
+    if mode != "night" and (datetime.now().hour >= 19 or datetime.now().hour <= 6):
         start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        mode = "night"
         CONF_MATRIX_FILE = SAVE_DIR / f"ir_confusion_matrix_{start_time}_night.txt"
-    else:
+        ir_confusion_matrix = {
+            "rgb 1 ir 0" : 0,
+            "rgb 0 ir 1" : 0,
+            "rgb 1 ir 1" : 0
+        }
+    elif mode != "day" and (datetime.now().hour < 19 and datetime.now().hour > 6):
         start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        mode = "day"
         CONF_MATRIX_FILE = SAVE_DIR / f"ir_confusion_matrix_{start_time}_day.txt"
+        ir_confusion_matrix = {
+            "rgb 1 ir 0" : 0,
+            "rgb 0 ir 1" : 0,
+            "rgb 1 ir 1" : 0
+        }
 
     rgb_detected = False
     ir_detected = False
@@ -100,15 +114,15 @@ while True:
     if 'Bird' in ir_results.label_names:
         ir_detected = True
 
-    if ir_detected and rgb_detected:
-        ir_confusion_matrix["rgb 1 ir 1"] += 1
-    if not ir_detected and rgb_detected:
-        ir_confusion_matrix["rgb 1 ir 0"] += 1
-    if ir_detected and not rgb_detected:
-        ir_confusion_matrix["rgb 0 ir 1"] += 1
-
     if (ir_detected or rgb_detected) and (now - last_photo_time) > COOLDOWN:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+
+        if ir_detected and rgb_detected:
+            ir_confusion_matrix["rgb 1 ir 1"] += 1
+        if not ir_detected and rgb_detected:
+            ir_confusion_matrix["rgb 1 ir 0"] += 1
+        if ir_detected and not rgb_detected:
+            ir_confusion_matrix["rgb 0 ir 1"] += 1
 
         img_path = f"{SAVE_DIR}/bird_{timestamp}.jpg"
         # txt_path = f"{SAVE_DIR}/birds_{timestamp}.txt"
@@ -123,8 +137,8 @@ while True:
         if ir_detected:
             bb_ir_frame = visualise_result(frame_ir, ir_results)
             cv2.imwrite(bb_ir_path, bb_ir_frame)
-        if rgb_detected:
-            cv2.imwrite(bb_img_path, frame_copy)
+
+        cv2.imwrite(bb_img_path, frame_copy)
 
         # second RGB camera save:
         if CAMERA_RGB_2 != -1:
@@ -151,3 +165,4 @@ while True:
             f.write(f"Timestamp: {timestamp}")
 
         last_photo_time = now
+    sleep(SLEEP_TIME)
