@@ -30,6 +30,10 @@ def take_frame(cam_no, is_ir=False, rotate=False):
         frame = cv2.rotate(frame, cv2.ROTATE_180)
     return frame
 
+def save_frame(save_path : Path, frame):
+    cv2.imwrite(save_path, frame)
+    print(f"📸 Saved: {img_path}")
+
 SAVE_DIR = Path(__file__).parent / "birds"
 COOLDOWN = 90
 SLEEP_TIME = 30
@@ -125,36 +129,24 @@ while True:
             ir_confusion_matrix["rgb 0 ir 1"] += 1
 
         img_path = f"{SAVE_DIR}/bird_{timestamp}.jpg"
-        # txt_path = f"{SAVE_DIR}/birds_{timestamp}.txt"
         bb_img_path = f"{SAVE_DIR}/bird_{timestamp}_bb.jpg"
         img_rgb2_path = f"{SAVE_DIR}/bird_{timestamp}_RGB2.jpg"
         ir_path = f"{SAVE_DIR}/bird_{timestamp}_ir.jpg"
         bb_ir_path = f"{SAVE_DIR}/bird_{timestamp}_irbb.jpg"
-        # txt_ir_path = f"{SAVE_DIR}/birds_{timestamp}_ir.txt"
 
-        cv2.imwrite(img_path, frame)
-        cv2.imwrite(ir_path, frame_ir)  
+        save_frame(img_path, frame)
+        save_frame(ir_path, frame_ir)  
         if ir_detected:
             bb_ir_frame = visualise_result(frame_ir, ir_results)
-            cv2.imwrite(bb_ir_path, bb_ir_frame)
+            save_frame(bb_ir_path, bb_ir_frame)
 
-        cv2.imwrite(bb_img_path, frame_copy)
+        save_frame(bb_img_path, frame_copy)
 
         # second RGB camera save:
         if CAMERA_RGB_2 != -1:
             rgb2_photo = take_frame(CAMERA_RGB_2)
             if rgb2_photo is not None:
-                cv2.imwrite(img_rgb2_path, rgb2_photo)
-
-        # with open(txt_path, "w") as f:
-        #     for name, conf, x1, y1, x2, y2 in bird_boxes:
-        #         f.write(f"{name} {conf:.3f} {x1} {y1} {x2} {y2}\n")
-
-        print(f"📸 Saved: {img_path}")
-        # print(f"📦 Boxes: {txt_path}")
-        print(f"📸 Saved IR: {ir_path}")
-        print(f"📸 Saved IR with boxes: {bb_ir_path}")
-        print(f"📸 Saved with boxes: {bb_img_path}")
+                save_frame(img_rgb2_path, rgb2_photo)
 
         confusion_matrix_text = f"\t RGB 1 \t RGB 0 \n IR 1 \t {ir_confusion_matrix["rgb 1 ir 1"]} \t {ir_confusion_matrix["rgb 0 ir 1"]} \n IR 0 \t {ir_confusion_matrix["rgb 1 ir 0"]} \t N/A"
 
