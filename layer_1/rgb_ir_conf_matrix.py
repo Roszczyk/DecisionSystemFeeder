@@ -30,8 +30,13 @@ def take_frame(cam_no, is_ir=False, rotate=False):
         frame = cv2.rotate(frame, cv2.ROTATE_180)
     return frame
 
+def save_frame(save_path : Path, frame):
+    cv2.imwrite(save_path, frame)
+    print(f"📸 Saved: {save_path}")
+
 SAVE_DIR = Path(__file__).parent / "birds"
-COOLDOWN = 60
+COOLDOWN = 90
+SLEEP_TIME = 30
 CONF_THRESHOLD = 0.5
 start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
@@ -58,13 +63,26 @@ ir_confusion_matrix = {
     "rgb 1 ir 1" : 0
 }
 
+mode = None
 while True:
-    if datetime.now().hour >= 19 or datetime.now().hour <= 6:
+    if mode != "night" and (datetime.now().hour >= 19 or datetime.now().hour <= 6):
         start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        mode = "night"
         CONF_MATRIX_FILE = SAVE_DIR / f"ir_confusion_matrix_{start_time}_night.txt"
-    else:
+        ir_confusion_matrix = {
+            "rgb 1 ir 0" : 0,
+            "rgb 0 ir 1" : 0,
+            "rgb 1 ir 1" : 0
+        }
+    elif mode != "day" and (datetime.now().hour < 19 and datetime.now().hour > 6):
         start_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        mode = "day"
         CONF_MATRIX_FILE = SAVE_DIR / f"ir_confusion_matrix_{start_time}_day.txt"
+        ir_confusion_matrix = {
+            "rgb 1 ir 0" : 0,
+            "rgb 0 ir 1" : 0,
+            "rgb 1 ir 1" : 0
+        }
 
     rgb_detected = False
     ir_detected = False
@@ -100,47 +118,35 @@ while True:
     if 'Bird' in ir_results.label_names:
         ir_detected = True
 
-    if ir_detected and rgb_detected:
-        ir_confusion_matrix["rgb 1 ir 1"] += 1
-    if not ir_detected and rgb_detected:
-        ir_confusion_matrix["rgb 1 ir 0"] += 1
-    if ir_detected and not rgb_detected:
-        ir_confusion_matrix["rgb 0 ir 1"] += 1
-
     if (ir_detected or rgb_detected) and (now - last_photo_time) > COOLDOWN:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
+        if ir_detected and rgb_detected:
+            ir_confusion_matrix["rgb 1 ir 1"] += 1
+        if not ir_detected and rgb_detected:
+            ir_confusion_matrix["rgb 1 ir 0"] += 1
+        if ir_detected and not rgb_detected:
+            ir_confusion_matrix["rgb 0 ir 1"] += 1
+
         img_path = f"{SAVE_DIR}/bird_{timestamp}.jpg"
-        # txt_path = f"{SAVE_DIR}/birds_{timestamp}.txt"
         bb_img_path = f"{SAVE_DIR}/bird_{timestamp}_bb.jpg"
         img_rgb2_path = f"{SAVE_DIR}/bird_{timestamp}_RGB2.jpg"
         ir_path = f"{SAVE_DIR}/bird_{timestamp}_ir.jpg"
         bb_ir_path = f"{SAVE_DIR}/bird_{timestamp}_irbb.jpg"
-        # txt_ir_path = f"{SAVE_DIR}/birds_{timestamp}_ir.txt"
 
-        cv2.imwrite(img_path, frame)
-        cv2.imwrite(ir_path, frame_ir)  
+        save_frame(img_path, frame)
+        save_frame(ir_path, frame_ir)  
         if ir_detected:
             bb_ir_frame = visualise_result(frame_ir, ir_results)
-            cv2.imwrite(bb_ir_path, bb_ir_frame)
-        if rgb_detected:
-            cv2.imwrite(bb_img_path, frame_copy)
+            save_frame(bb_ir_path, bb_ir_frame)
+
+        save_frame(bb_img_path, frame_copy)
 
         # second RGB camera save:
         if CAMERA_RGB_2 != -1:
             rgb2_photo = take_frame(CAMERA_RGB_2)
             if rgb2_photo is not None:
-                cv2.imwrite(img_rgb2_path, rgb2_photo)
-
-        # with open(txt_path, "w") as f:
-        #     for name, conf, x1, y1, x2, y2 in bird_boxes:
-        #         f.write(f"{name} {conf:.3f} {x1} {y1} {x2} {y2}\n")
-
-        print(f"📸 Saved: {img_path}")
-        # print(f"📦 Boxes: {txt_path}")
-        print(f"📸 Saved IR: {ir_path}")
-        print(f"📸 Saved IR with boxes: {bb_ir_path}")
-        print(f"📸 Saved with boxes: {bb_img_path}")
+                save_frame(img_rgb2_path, rgb2_photo)
 
         confusion_matrix_text = f"\t RGB 1 \t RGB 0 \n IR 1 \t {ir_confusion_matrix["rgb 1 ir 1"]} \t {ir_confusion_matrix["rgb 0 ir 1"]} \n IR 0 \t {ir_confusion_matrix["rgb 1 ir 0"]} \t N/A"
 
@@ -151,3 +157,4 @@ while True:
             f.write(f"Timestamp: {timestamp}")
 
         last_photo_time = now
+    sleep(SLEEP_TIME)
