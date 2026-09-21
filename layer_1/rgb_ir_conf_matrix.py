@@ -32,7 +32,7 @@ def take_frame(cam_no, is_ir=False, rotate=False):
 
 def save_frame(save_path : Path, frame):
     cv2.imwrite(save_path, frame)
-    print(f"📸 Saved: {img_path}")
+    print(f"📸 Saved: {save_path}")
 
 SAVE_DIR = Path(__file__).parent / "birds"
 COOLDOWN = 90
