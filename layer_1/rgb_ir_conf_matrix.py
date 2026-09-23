@@ -8,7 +8,7 @@ from time import sleep
 import copy
 
 from layer1_utils import take_frame, save_frame, get_camera_config, record_and_save_video
-from thirdparty.geti.utils import load_model, visualise_result, load_image
+from thirdparty.geti.utils import load_model, visualise_result
 
 SAVE_DIR = Path(__file__).parent / "birds"
 COOLDOWN = 90
