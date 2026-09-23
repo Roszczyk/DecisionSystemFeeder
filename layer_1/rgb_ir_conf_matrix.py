@@ -137,13 +137,13 @@ while True:
             if rgb2_photo is not None:
                 save_frame(img_rgb2_path, rgb2_photo, verbose=True)
 
-        confusion_matrix_text = f"\t RGB 1 \t RGB 0 \n IR 1 \t {ir_confusion_matrix["rgb 1 ir 1"]} \t {ir_confusion_matrix["rgb 0 ir 1"]} \n IR 0 \t {ir_confusion_matrix["rgb 1 ir 0"]} \t N/A"
+        confusion_matrix_text = f"\t RGB 1 \t RGB 0 \n IR 1 \t {ir_confusion_matrix["rgb 1 ir 1"]} \t {ir_confusion_matrix["rgb 0 ir 1"]} \n IR 0 \t {ir_confusion_matrix["rgb 1 ir 0"]} \t N/A\n"
 
         print(confusion_matrix_text)
         with open(CONF_MATRIX_FILE, "w") as f:
             f.write(confusion_matrix_text)
-            f.write(f"Start time: {start_time}")
-            f.write(f"Timestamp: {timestamp}")
+            f.write(f"\nStart time: {start_time}")
+            f.write(f"\nTimestamp: {timestamp}")
 
         last_photo_time = now
     sleep(SLEEP_TIME)
