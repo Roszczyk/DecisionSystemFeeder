@@ -4,35 +4,11 @@ from ultralytics import YOLO
 from datetime import datetime
 import os
 from pathlib import Path
-import json
 from time import sleep
 import copy
 
-from CV_InfraredCamera.infrared_utils import process_ir_frame
+from layer1_utils import take_frame, save_frame, get_camera_config, record_and_save_video
 from thirdparty.geti.utils import load_model, visualise_result
-
-def get_camera_config(config_file):
-    with open(config_file) as f:
-        return json.load(f)
-
-def take_frame(cam_no, is_ir=False, rotate=False):
-    cap = cv2.VideoCapture(cam_no)
-    if not cap.isOpened():
-        print("Cannot open camera")
-        exit()
-    ret, frame = cap.read()
-    if not ret:
-        return
-    cap.release()
-    if is_ir:
-        frame = process_ir_frame(frame)
-    if rotate:
-        frame = cv2.rotate(frame, cv2.ROTATE_180)
-    return frame
-
-def save_frame(save_path : Path, frame):
-    cv2.imwrite(save_path, frame)
-    print(f"📸 Saved: {save_path}")
 
 SAVE_DIR = Path(__file__).parent / "birds"
 COOLDOWN = 90
@@ -113,10 +89,12 @@ while True:
     if len(bird_boxes) > 0:
         rgb_detected = True
 
-    now = time.time()
+    for i in range(len(ir_results.label_names)):
+        if ir_results.label_names[i] == "Bird" and ir_results.scores[i] > CONF_THRESHOLD:
+            ir_detected = True
+            break
 
-    if 'Bird' in ir_results.label_names:
-        ir_detected = True
+    now = time.time()
 
     if (ir_detected or rgb_detected) and (now - last_photo_time) > COOLDOWN:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -134,27 +112,38 @@ while True:
         ir_path = f"{SAVE_DIR}/bird_{timestamp}_ir.jpg"
         bb_ir_path = f"{SAVE_DIR}/bird_{timestamp}_irbb.jpg"
 
-        save_frame(img_path, frame)
-        save_frame(ir_path, frame_ir)  
+        # =============================================================
+        # RECORDING: to be deleted in future, just wanted some mp4 data
+        rgb1_recording_path = f"{SAVE_DIR}/recording_{timestamp}_rgb1.mp4"
+        rgb2_recording_path = f"{SAVE_DIR}/recording_{timestamp}_rgb2.mp4"
+        ir_recording_path = f"{SAVE_DIR}/recording_{timestamp}_rgb2.mp4"
+        if rgb_detected:
+            record_and_save_video(CAMERA_RGB, rgb1_recording_path, duration=3, rotate=True, verbose=True)
+            record_and_save_video(CAMERA_RGB_2, rgb2_recording_path, duration=3, rotate=False, verbose=True)
+            record_and_save_video(CAMERA_IR, ir_recording_path, duration=3, ir_ir=True, verbose=True)
+        # =============================================================
+
+        save_frame(img_path, frame, verbose=True)
+        save_frame(ir_path, frame_ir, verbose=True)  
         if ir_detected:
             bb_ir_frame = visualise_result(frame_ir, ir_results)
-            save_frame(bb_ir_path, bb_ir_frame)
+            save_frame(bb_ir_path, bb_ir_frame, verbose=True)
 
-        save_frame(bb_img_path, frame_copy)
+        save_frame(bb_img_path, frame_copy, verbose=True)
 
         # second RGB camera save:
         if CAMERA_RGB_2 != -1:
             rgb2_photo = take_frame(CAMERA_RGB_2)
             if rgb2_photo is not None:
-                save_frame(img_rgb2_path, rgb2_photo)
+                save_frame(img_rgb2_path, rgb2_photo, verbose=True)
 
-        confusion_matrix_text = f"\t RGB 1 \t RGB 0 \n IR 1 \t {ir_confusion_matrix["rgb 1 ir 1"]} \t {ir_confusion_matrix["rgb 0 ir 1"]} \n IR 0 \t {ir_confusion_matrix["rgb 1 ir 0"]} \t N/A"
+        confusion_matrix_text = f"\t RGB 1 \t RGB 0 \n IR 1 \t {ir_confusion_matrix["rgb 1 ir 1"]} \t {ir_confusion_matrix["rgb 0 ir 1"]} \n IR 0 \t {ir_confusion_matrix["rgb 1 ir 0"]} \t N/A\n"
 
         print(confusion_matrix_text)
         with open(CONF_MATRIX_FILE, "w") as f:
             f.write(confusion_matrix_text)
-            f.write(f"Start time: {start_time}")
-            f.write(f"Timestamp: {timestamp}")
+            f.write(f"\nStart time: {start_time}")
+            f.write(f"\nTimestamp: {timestamp}")
 
         last_photo_time = now
     sleep(SLEEP_TIME)
