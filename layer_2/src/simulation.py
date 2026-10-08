@@ -106,13 +106,13 @@ class Simulation:
                 states_counters[current_state.name].add_to_results_correct_parts(1)
                 states_counters[current_state.name].add_to_results_including_correct()
                 states_counters[current_state.name].add_to_results_only_correct()
-                continue
-            for state in final_decision.states:
-                if state.name == current_state.name:
-                    main_counter.add_to_results_including_correct()
-                    main_counter.add_to_results_correct_parts(1 / len(final_decision.states))
-                    states_counters[current_state.name].add_to_results_including_correct()
-                    states_counters[current_state.name].add_to_results_correct_parts(1 / len(final_decision.states))
+            else:
+                for state in final_decision.states:
+                    if state.name == current_state.name:
+                        main_counter.add_to_results_including_correct()
+                        main_counter.add_to_results_correct_parts(1 / len(final_decision.states))
+                        states_counters[current_state.name].add_to_results_including_correct()
+                        states_counters[current_state.name].add_to_results_correct_parts(1 / len(final_decision.states))
             self.env.change_state()
 
         results_dict = dict()
