@@ -4,7 +4,6 @@ from ultralytics import YOLO
 from datetime import datetime
 import os
 from pathlib import Path
-import json
 from time import sleep
 import copy
 import sys
@@ -13,29 +12,11 @@ MAIN_REPOSITORY_DIR = Path(__file__).parent.parent.parent
 LAYER1_CONTEXT_DIR = MAIN_REPOSITORY_DIR / "layer_1"
 
 sys.path.append(
-    str(LAYER1_CONTEXT_DIR / "CV_InfraredCamera")
+    str(LAYER1_CONTEXT_DIR)
 )
 
-from infrared_utils import process_ir_frame
+from layer1_utils import take_frame, get_camera_config
 
-def get_camera_config(config_file):
-    with open(config_file) as f:
-        return json.load(f)
-
-def take_frame(cam_no, is_ir=False, rotate=False):
-    cap = cv2.VideoCapture(cam_no)
-    if not cap.isOpened():
-        print("Cannot open camera")
-        exit()
-    ret, frame = cap.read()
-    if not ret:
-        return
-    cap.release()
-    if is_ir:
-        frame = process_ir_frame(frame)
-    if rotate:
-        frame = cv2.rotate(frame, cv2.ROTATE_180)
-    return frame
 
 SAVE_DIR = Path(__file__).parent / "birds"
 COOLDOWN = 60
