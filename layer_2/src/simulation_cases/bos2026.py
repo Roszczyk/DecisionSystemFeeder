@@ -156,9 +156,9 @@ def scenario_01_low_uncertainty(
     environment = create_environment()
 
     uncertainty_parameters = [
-        ("LowUncertainty_001", 0.01, 0.5),
-        ("LowUncertainty_002", 0.015, 0.5),
-        ("LowUncertainty_003", 0.02, 0.5),
+        ("LowUncertainty_001", 0.01, 1.5),
+        ("LowUncertainty_002", 0.015, 1.25),
+        ("LowUncertainty_003", 0.02, 1),
     ]
 
     sensors = create_sensors(

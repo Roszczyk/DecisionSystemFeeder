@@ -4,7 +4,6 @@ from src.fusion import FusionLibrary
 
 
 if __name__ == "__main__":
-    print("Simulation FEEDER")
     run_methods = list(FusionLibrary().methods.keys())
     run_methods.remove("classical Bayes")
     scenario_01_low_uncertainty(run_methods)
