@@ -7,5 +7,5 @@ if __name__ == "__main__":
     print("Simulation FEEDER")
     run_methods = list(FusionLibrary().methods.keys())
     run_methods.remove("classical Bayes")
-    scenario_02_high_uncertainty(run_methods)
     scenario_01_low_uncertainty(run_methods)
+    scenario_02_high_uncertainty(run_methods)
