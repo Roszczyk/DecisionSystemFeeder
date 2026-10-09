@@ -1,5 +1,6 @@
 from copy import deepcopy
 import random
+import time
 
 from src.states import State, StateMeasured
 from src.environment import Environment, Metric
@@ -172,8 +173,8 @@ def scenario_01_low_uncertainty(
             ("LowUncertainty_014", 0.016, 0.2),
             ("LowUncertainty_015", 0.008, 0.6),
             ("LowUncertainty_016", 0.013, 0.3),
-            ("LowUncertainty_017", 0.020, 0.2),
-            ("LowUncertainty_018", 0.010, 0.3)
+            ("HighUncertainty_017", 0.28, 5.0),
+            ("HighUncertainty_018", 0.16, 7.0)
     ]
 
     sensors = create_sensors(
