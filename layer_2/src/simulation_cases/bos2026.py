@@ -159,6 +159,15 @@ def scenario_01_low_uncertainty(
         ("LowUncertainty_001", 0.01, 1.5),
         ("LowUncertainty_002", 0.015, 1.25),
         ("LowUncertainty_003", 0.02, 1),
+        ("LowUncertainty_004", 0.01, 1.5),
+        ("LowUncertainty_005", 0.015, 1.25),
+        ("LowUncertainty_006", 0.02, 1),
+        ("LowUncertainty_007", 0.01, 1.5),
+        ("LowUncertainty_008", 0.015, 1.25),
+        ("LowUncertainty_009", 0.02, 1),
+        ("LowUncertainty_010", 0.01, 1.5),
+        ("LowUncertainty_011", 0.015, 1.25),
+        ("LowUncertainty_012", 0.02, 1)
     ]
 
     sensors = create_sensors(
@@ -189,6 +198,15 @@ def scenario_02_high_uncertainty(
         ("HighUncertainty_001", 0.20, 8),
         ("HighUncertainty_002", 0.25, 10),
         ("HighUncertainty_003", 0.30, 12),
+        ("HighUncertainty_004", 0.20, 8),
+        ("HighUncertainty_005", 0.25, 10),
+        ("HighUncertainty_006", 0.30, 12),
+        ("HighUncertainty_007", 0.20, 8),
+        ("HighUncertainty_008", 0.25, 10),
+        ("HighUncertainty_009", 0.30, 12),
+        ("HighUncertainty_010", 0.20, 8),
+        ("HighUncertainty_011", 0.25, 10),
+        ("HighUncertainty_012", 0.30, 12)
     ]
 
     sensors = create_sensors(
