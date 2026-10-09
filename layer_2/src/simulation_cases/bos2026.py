@@ -236,7 +236,7 @@ def scenario_02_high_uncertainty(
         verbose,
     )
 
-def test_amount_of_sensors(
+def test_number_of_sensors(
         fusion_methods=None,
         iterations=1000,
         return_all_logs=False,
