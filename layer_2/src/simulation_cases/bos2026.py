@@ -4,7 +4,7 @@ import time
 
 from src.states import State, StateMeasured
 from src.environment import Environment, Metric
-from src.sensor import ScalarSensor, LabelThreshold, conditional_probabilities_matrix_helper
+from src.sensor import ScalarSensor, LabelThreshold, conditional_probabilities_matrix_helper, SimpleSensor
 from src.fusion import FusionLibrary
 from src.simulation import Simulation
 
@@ -367,3 +367,45 @@ def scenario_03_bayesian_calibrated(
         return_all_logs,
         verbose,
     )
+
+def scenario_04_simple_sensor_replies(
+        fusion_methods=None,
+        iterations=1000,
+        return_all_logs=False,
+        verbose=True,
+    ):
+    
+    states = get_states()
+
+    metric_A_measure = lambda s, p: "A" in s.name
+    metric_B_measure = lambda s, p: "B" in s.name
+    metric_C_measure = lambda s, p: "C" in s.name
+    metric_D_measure = lambda s, p: "D" in s.name
+
+    metric_A = Metric("type_A_metric", metric_A_measure)
+    metric_B = Metric("type_B_metric", metric_B_measure)
+    metric_C = Metric("type_C_metric", metric_C_measure)
+    metric_D = Metric("type_D_metric", metric_D_measure)
+
+    states = get_states()
+    env = Environment(states)
+
+    env.add_metric(metric_A)
+    env.add_metric(metric_B)
+    env.add_metric(metric_C)
+    env.add_metric(metric_D)
+
+    type_A_state_draft = [StateMeasured([states[0]]), StateMeasured(states[1:])]
+    type_B_state_draft = [StateMeasured([states[1]]), StateMeasured([states[0]]+states[2:])]
+    type_C_state_draft = [StateMeasured([states[2]]), StateMeasured(states[0:2]+[states[3:]])]
+    type_C_state_draft = [StateMeasured([states[3]]), StateMeasured(states[0:3])]
+
+    def measurement_func(env : Environment, metric_type : str, state_draft):
+        assert metric_type in ["A", "B", "C", "D"]
+        is_metric = env.measure_metric(f"type_{metric_type}_metric")
+        return state_draft[0] if is_metric else state_draft[1]
+        
+
+    sensors = [
+        SimpleSensor("LowUncertainty_A_001", type_A_state_draft, )
+    ]
