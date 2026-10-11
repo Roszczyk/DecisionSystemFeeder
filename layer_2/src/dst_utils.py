@@ -49,7 +49,7 @@ def dempster_combination_rule(                      # m1 ⊕ m2(C) = (Σ A∩B=C
                     combined.get(intersection, 0.0) + product
                 )
     if conflict >= 1.0:
-        print("[WARNING] Dempster Combination Rule: Full conflict. Returning all states as possible.")
+        # print("[WARNING] Dempster Combination Rule: Full conflict. Returning all states as possible.")
         all_states = list(state_name_mapping.values())
         return [StateMeasured(
             fused_states=all_states,
