@@ -46,11 +46,11 @@ def main_feeder_simulation(fusion_methods : list[str] = None, iterations : int =
 
     movement_sensors = [
         SimpleSensor("01_movement_sensor_good", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0.95), 
-                     0.95, None),
+                     0.05, None),
         SimpleSensor("02_movement_sensor", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0.85), 
-                     0.85, None),
+                     0.15, None),
         SimpleSensor("03_movement_sensor_poor", simplest_sensor_states_measured_possible, lambda e: movement_func(e, 0.7),
-                     0.7, None)     # TODO To run Bayes, I need to prepare conditional_probabilities
+                     0.3, None)     # TODO To run Bayes, I need to prepare conditional_probabilities
     ]
     all_sensors += movement_sensors
 

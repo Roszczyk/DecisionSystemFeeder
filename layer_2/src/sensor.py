@@ -210,5 +210,5 @@ class SimpleSensor(Sensor):
         for state in measurement.states:
             states_table[state] = True
         chosen_state = StateMeasured(measurement.states, self.true_probability)
-        not_chosen_state = StateMeasured(not_chosen_states, 1.0 - self.false_probability)
+        not_chosen_state = StateMeasured(not_chosen_states, self.false_probability)
         return [chosen_state, not_chosen_state]
