@@ -4,7 +4,7 @@ import time
 
 from src.states import State, StateMeasured
 from src.environment import Environment, Metric
-from src.sensor import ScalarSensor, LabelThreshold
+from src.sensor import ScalarSensor, LabelThreshold, conditional_probabilities_matrix_helper
 from src.fusion import FusionLibrary
 from src.simulation import Simulation
 
@@ -25,10 +25,10 @@ def create_environment():
     def measure_metric(state: State, previous_value: float) -> float:
         if state.name == "A":
             base = 20
-            spread = 20
-        elif state.name == "B":
-            base = 45
             spread = 25
+        elif state.name == "B":
+            base = 42
+            spread = 30
         elif state.name == "C":
             base = 65
             spread = 25
@@ -66,6 +66,7 @@ def create_labels(states):
 def create_sensors(
     environment,
     uncertainty_parameters,
+    conditional_probs = None
 ):
     states = environment.states
     labels = create_labels(states)
@@ -75,16 +76,31 @@ def create_sensors(
 
     sensors = []
 
-    for name, relative, absolute in uncertainty_parameters:
-        sensors.append(
-            ScalarSensor(
-                name,
-                measure,
-                relative,
-                absolute,
-                labels,
+    if conditional_probs == None:
+        for name, relative, absolute in uncertainty_parameters:
+            sensors.append(
+                ScalarSensor(
+                    name,
+                    measure,
+                    relative,
+                    absolute,
+                    labels
+                )
             )
-        )
+    else:
+        assert len(uncertainty_parameters) == len(conditional_probs)
+        for i in range(len(uncertainty_parameters)):
+            sensors.append(
+                ScalarSensor(
+                    uncertainty_parameters[i][0],
+                    measure,
+                    uncertainty_parameters[i][1],
+                    uncertainty_parameters[i][2],
+                    labels,
+                    conditional_probs[i]
+                )
+            )
+
 
     return sensors
 
@@ -241,7 +257,8 @@ def test_number_of_sensors(
         fusion_methods=None,
         iterations=1000,
         return_all_logs=False,
-        verbose=True):
+        verbose=True
+        ):
 
     environment = create_environment()
 
@@ -280,3 +297,72 @@ def test_number_of_sensors(
             return_all_logs,
             verbose,
         )
+
+def scenario_03_bayesian_calibrated(
+        fusion_methods=None,
+        iterations=1000,
+        return_all_logs=False,
+        verbose=True,
+    ):
+
+    states = get_states()
+
+    # Same sensor parameters as in the previous scenarios.
+    low_uncertainty_params = [
+        ("Sensor_001", 0.005, 0.2),
+        ("Sensor_002", 0.007, 0.3),
+        ("Sensor_003", 0.010, 0.2),
+        ("Sensor_004", 0.012, 0.4),
+        ("Sensor_005", 0.008, 0.5),
+        ("Sensor_006", 0.015, 0.3),
+        ("Sensor_007", 0.006, 0.6),
+        ("Sensor_008", 0.010, 0.5),
+        ("Sensor_009", 0.014, 0.2),
+    ]
+
+    high_uncertainty_params = [
+        ("Sensor_010", 0.10, 4.0),
+        ("Sensor_011", 0.12, 5.0),
+        ("Sensor_012", 0.15, 4.0),
+        ("Sensor_013", 0.18, 6.0),
+        ("Sensor_014", 0.14, 8.0),
+        ("Sensor_015", 0.20, 5.0),
+        ("Sensor_016", 0.11, 9.0),
+        ("Sensor_017", 0.16, 7.0),
+        ("Sensor_018", 0.22, 4.0),
+    ]
+
+    states_measured = [StateMeasured([x], 0, x.name) for x in states]
+
+    conditional_probabilites_matrix_low = conditional_probabilities_matrix_helper([
+            [0.90, 0.10, 0.00, 0.00],
+            [0.10, 0.83, 0.07, 0.00],
+            [0.00, 0.10, 0.80, 0.10],
+            [0.00, 0.00, 0.00, 1.00]
+        ], states, states_measured)
+
+    conditional_probabilites_matrix_high = conditional_probabilities_matrix_helper([
+            [0.80, 0.20, 0.00, 0.00],
+            [0.16, 0.72, 0.12, 0.00],
+            [0.00, 0.14, 0.68, 0.18],
+            [0.00, 0.00, 0.20, 0.80]
+        ], states, states_measured)
+
+    environment = create_environment()
+
+    sensors = create_sensors(
+        environment,
+        low_uncertainty_params + high_uncertainty_params,
+        [conditional_probabilites_matrix_low] * len(low_uncertainty_params) 
+            + [conditional_probabilites_matrix_high] * len(high_uncertainty_params)
+    )
+
+    return run_scenario(
+        "Scenario 3: Probabilities defined",
+        environment,
+        sensors,
+        iterations,
+        fusion_methods,
+        return_all_logs,
+        verbose,
+    )
