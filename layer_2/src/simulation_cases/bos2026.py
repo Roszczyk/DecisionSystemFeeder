@@ -101,6 +101,7 @@ def create_sensors(
                 )
             )
 
+    print(sensors)
 
     return sensors
 
@@ -335,17 +336,17 @@ def scenario_03_bayesian_calibrated(
     states_measured = [StateMeasured([x], 0, x.name) for x in states]
 
     conditional_probabilites_matrix_low = conditional_probabilities_matrix_helper([
-            [0.90, 0.10, 0.00, 0.00],
-            [0.10, 0.83, 0.07, 0.00],
-            [0.00, 0.10, 0.80, 0.10],
-            [0.00, 0.00, 0.00, 1.00]
+            [0.88, 0.10, 0.01, 0.01],
+            [0.10, 0.82, 0.07, 0.01],
+            [0.01, 0.09, 0.80, 0.10],
+            [0.01, 0.01, 0.02, 0.96]
         ], states, states_measured)
 
     conditional_probabilites_matrix_high = conditional_probabilities_matrix_helper([
-            [0.80, 0.20, 0.00, 0.00],
-            [0.16, 0.72, 0.12, 0.00],
-            [0.00, 0.14, 0.68, 0.18],
-            [0.00, 0.00, 0.20, 0.80]
+            [0.77, 0.20, 0.02, 0.01],
+            [0.15, 0.72, 0.12, 0.01],
+            [0.01, 0.13, 0.68, 0.18],
+            [0.01, 0.02, 0.20, 0.77]
         ], states, states_measured)
 
     environment = create_environment()
