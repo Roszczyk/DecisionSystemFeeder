@@ -137,11 +137,13 @@ class ScalarSensor(Sensor):
         measurement = self.measure(environment)
         uncertainty = self.calculate_uncertainty(measurement)
         result = []
+        check_sum_1 = 0
         for label in self.labels_thresholds:
             probability = self.gauss_probability(measurement, uncertainty, label)
             label.state.mass = probability
             result.append(deepcopy(label.state))
-        assert int(round(result[0].mass + result[1].mass)) == 1, round(result[0].mass + result[1].mass)
+            check_sum_1 += label.state.mass
+        assert int(round(check_sum_1)) == 1, f"Mass values have to sum to 1, not {round(check_sum_1)}"
         return result
     
 ################################
