@@ -101,6 +101,8 @@ def create_sensors(
                 )
             )
 
+    print(sensors)
+
     return sensors
 
 
@@ -386,7 +388,7 @@ def scenario_04_simple_sensor_replies(
     metric_D = Metric("type_D_metric", metric_D_measure)
 
     states = get_states()
-    env = create_environment()
+    env = Environment(states)
 
     env.add_metric(metric_A)
     env.add_metric(metric_B)
@@ -395,41 +397,15 @@ def scenario_04_simple_sensor_replies(
 
     type_A_state_draft = [StateMeasured([states[0]]), StateMeasured(states[1:])]
     type_B_state_draft = [StateMeasured([states[1]]), StateMeasured([states[0]]+states[2:])]
-    type_C_state_draft = [StateMeasured([states[2]]), StateMeasured(states[0:2]+states[3:])]
-    type_D_state_draft = [StateMeasured([states[3]]), StateMeasured(states[0:3])]
+    type_C_state_draft = [StateMeasured([states[2]]), StateMeasured(states[0:2]+[states[3:]])]
+    type_C_state_draft = [StateMeasured([states[3]]), StateMeasured(states[0:3])]
 
-    def measurement_func(env : Environment, metric_type : str, state_draft, mistake_prob : int):
+    def measurement_func(env : Environment, metric_type : str, state_draft):
         assert metric_type in ["A", "B", "C", "D"]
         is_metric = env.measure_metric(f"type_{metric_type}_metric")
-        is_metric = is_metric if random.random() > mistake_prob else is_metric
         return state_draft[0] if is_metric else state_draft[1]
         
+
     sensors = [
-        # SimpleSensor("LowUncertainty_A_001", type_A_state_draft, lambda env: measurement_func(env, "A", type_A_state_draft, 0.1), 0.1),
-        SimpleSensor("HighUncertainty_A_002", type_A_state_draft, lambda env: measurement_func(env, "A", type_A_state_draft, 0.3), 0.3),
-        # SimpleSensor("LowUncertainty_B_003", type_B_state_draft, lambda env: measurement_func(env, "B", type_B_state_draft, 0.1), 0.1),
-        SimpleSensor("HighUncertainty_B_004", type_B_state_draft, lambda env: measurement_func(env, "B", type_B_state_draft, 0.3), 0.3),
-        # SimpleSensor("LowUncertainty_C_005", type_C_state_draft, lambda env: measurement_func(env, "C", type_C_state_draft, 0.1), 0.1),
-        SimpleSensor("HighUncertainty_C_006", type_C_state_draft, lambda env: measurement_func(env, "C", type_C_state_draft, 0.3), 0.3),
-        # SimpleSensor("LowUncertainty_D_007", type_D_state_draft, lambda env: measurement_func(env, "D", type_D_state_draft, 0.1), 0.1),
-        SimpleSensor("HighUncertainty_D_008", type_D_state_draft, lambda env: measurement_func(env, "D", type_D_state_draft, 0.3), 0.3)
+        SimpleSensor("LowUncertainty_A_001", type_A_state_draft, )
     ]
-
-    
-    scalar_sensor_params = [
-        ("ScalarSensor_010", 0.10, 4.0),
-        ("ScalarSensor_011", 0.12, 5.0),
-        ("ScalarSensor_012", 0.15, 4.0),
-        ("ScalarSensor_013", 0.18, 6.0)
-    ]
-    sensors = sensors + create_sensors(env, scalar_sensor_params)
-
-    return run_scenario(
-        "Scenario 4: Probabilities defined",
-        env,
-        sensors,
-        iterations,
-        fusion_methods,
-        return_all_logs,
-        verbose,
-    )
