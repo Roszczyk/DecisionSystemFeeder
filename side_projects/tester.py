@@ -1,5 +1,16 @@
 import cv2
-from Photo_Taker.processing import process_ir_frame
+from pathlib import Path
+import sys
+
+MAIN_REPOSITORY_DIR = Path(__file__).parent.parent
+LAYER1_CONTEXT_DIR = MAIN_REPOSITORY_DIR / "layer_1"
+
+sys.path.append(
+    str(LAYER1_CONTEXT_DIR)
+)
+
+from layer1_utils import take_frame, get_camera_config
+from CV_InfraredCamera.infrared_utils import process_ir_frame
 
 for i in range(30):
     cap = cv2.VideoCapture(i, cv2.CAP_V4L2)
