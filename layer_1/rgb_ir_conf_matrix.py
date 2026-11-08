@@ -116,11 +116,11 @@ while True:
         # RECORDING: to be deleted in future, just wanted some mp4 data
         rgb1_recording_path = f"{SAVE_DIR}/recording_{timestamp}_rgb1.mp4"
         rgb2_recording_path = f"{SAVE_DIR}/recording_{timestamp}_rgb2.mp4"
-        ir_recording_path = f"{SAVE_DIR}/recording_{timestamp}_rgb2.mp4"
+        ir_recording_path = f"{SAVE_DIR}/recording_{timestamp}_ir.mp4"
         if rgb_detected:
-            record_and_save_video(CAMERA_RGB, rgb1_recording_path, duration=3, rotate=True, verbose=True)
-            record_and_save_video(CAMERA_RGB_2, rgb2_recording_path, duration=3, rotate=False, verbose=True)
-            record_and_save_video(CAMERA_IR, ir_recording_path, duration=3, ir_ir=True, verbose=True)
+            record_and_save_video(CAMERA_RGB, rgb1_recording_path, duration=5, rotate=True, verbose=True)
+            #record_and_save_video(CAMERA_RGB_2, rgb2_recording_path, duration=2, rotate=False, verbose=True)
+            record_and_save_video(CAMERA_IR, ir_recording_path, duration=5, is_ir=True, verbose=True)
         # =============================================================
 
         save_frame(img_path, frame, verbose=True)
