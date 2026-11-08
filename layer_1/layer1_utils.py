@@ -12,14 +12,28 @@ def record_and_save_video(cam_no, save_path, duration=5, is_ir=False, rotate=Fal
         print("Cannot open camera")
         return
 
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
-
     if fps <= 0 or fps > 120:
         fps = 20.0
 
+    ret, frame = cap.read()
+
+    if not ret:
+        print("Cannot read first frame")
+        cap.release()
+        return
+    if is_ir:
+        frame = process_ir_frame(frame)
+    if frame is None:
+        print("IR processing failed")
+        cap.release()
+        return
+    if rotate:
+        frame = cv2.rotate(frame, cv2.ROTATE_180)
+
+    height, width = frame.shape[:2]
     fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+
     out = cv2.VideoWriter(
         str(save_path),
         fourcc,
@@ -28,30 +42,36 @@ def record_and_save_video(cam_no, save_path, duration=5, is_ir=False, rotate=Fal
     )
 
     if not out.isOpened():
-        print(f"Cannot create video: {save_path}")
+        print("Cannot create video:", save_path)
         cap.release()
         return
 
     start = time.time()
+    out.write(frame)
 
     while time.time() - start < duration:
         ret, frame = cap.read()
 
         if not ret:
-            print("Cannot read frame")
             break
-
         if is_ir:
             frame = process_ir_frame(frame)
+        if frame is None:
+            print("Invalid frame")
+            continue
         if rotate:
             frame = cv2.rotate(frame, cv2.ROTATE_180)
+        if frame.shape[:2] != (height, width):
+            print("Frame dimensions mismatch:", frame.shape)
+            continue
 
         out.write(frame)
+
     cap.release()
     out.release()
 
     if verbose:
-        print(f"🎥 Saved video: {save_path}")
+        print(f"Saved video: {save_path}")
 
 def get_camera_config(config_file):
     with open(config_file) as f:
