@@ -24,6 +24,7 @@ Full current roadmap available [here](Docs/roadmap.md) - not updated.
 
 * Mikołaj Roszczyk - Raport z Pracowni Problemowej Magisterskiej, 2025 ([get content](Docs/Roszczyk_M_2025_Raport_PPMGR.pdf))
 * Mikołaj Roszczyk - Raport z Pracowni Dyplomowej Magisterskiej, 2025 ([get content](Docs/Roszczyk_M_2026_Raport_PDMGR.pdf))
+* Mikołaj Roszczyk, Daniel Paczesny - *Simulation-based Evaluation of Information Fusion Methods*, 2026, XII Conference Systems and Operational Research, Warsaw ([preprint](http://www.ptbois.org.pl/bos2026/teksty/M-Roszczyk-D-Paczesny-BOS-SOR2026.pdf))
 
 ## Related work
 * [InfraRed_Photos_Annotated_for_Birds_Detection](https://huggingface.co/datasets/Roszczyk/InfraRed_Photos_Annotated_for_Birds_Detection) - dataset with annotated photos (bounding boxes) of birds from the infrared camera in the feeder
