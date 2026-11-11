@@ -67,18 +67,17 @@ def run_configure(secrets, context):
   [[inputs.mqtt_consumer]]
     servers = ["tcp://mosquitto:1883"]
     topics = [
-      "Feeder/IoT/#"
+      "Feeder/IoT/+"
     ]
-
-    topic_exclude = [
-      "Feeder/IoT/bridge/#"
-    ]
-
     data_format = "json"
 
-  [[processors.converter]]
-    [processors.converter.fields]
-      integer = ["trigger_indicator"]
+  [[processors.starlark]]
+    source = '''
+def apply(metric):
+    if "trigger_indicator" in metric.fields:
+        metric.fields["trigger_indicator_int"] = 1 if metric.fields["trigger_indicator"] else 0
+    return metric
+'''
   """
 
   with open(context / "mosquitto.conf", "w") as mosquitto_file:
@@ -100,4 +99,4 @@ if __name__ == "__main__":
 
   run_configure(secrets, CONTEXT)
   
-  print("Done")
+  print("Done. Now run `docker compose up -d`.")
