@@ -70,6 +70,7 @@ def run_configure(secrets, context):
       "Feeder/IoT/+"
     ]
     data_format = "json"
+    json_string_fields = ["trigger_indicator"]
 
   [[processors.starlark]]
     source = '''
