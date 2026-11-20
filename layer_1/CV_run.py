@@ -76,7 +76,7 @@ if __name__ == "__main__":
         for i in range(len(ir_results.label_names)):
             if ir_results.label_names[i] == "Bird" and ir_results.scores[i] > CONF_THRESHOLD_IR:
                 count_ir_birds += 1
-        results_ir = CV_Det(count_ir_birds > 0, count_ir_birds, [CONF_THRESHOLD_IR]*count_ir_birds)
+        results_ir = CV_Det(count_ir_birds > 0, count_ir_birds, [CONF_THRESHOLD_IR]*count_ir_birds, CONF_THRESHOLD_IR)
         # =====================================================
         mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
 
