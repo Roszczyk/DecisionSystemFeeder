@@ -54,14 +54,6 @@ def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
 
     return output
 
-def model_helper(model, frame, type = "RGB"):
-    assert type in ["RGB", "IR"]
-    if type == "RGB":
-        results = model_rgb(frame, verbose=False)[0]
-    elif type == "IR":
-        results = model(frame)
-    return results
-
 if __name__ == "__main__":
     mqtt = MQTT_Publisher("0.0.0.0", 1883, "", "")
     while True:
