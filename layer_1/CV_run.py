@@ -57,7 +57,7 @@ def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
 def model_helper(model, frame, type = "RGB"):
     assert type in ["RGB", "IR"]
     if type == "RGB":
-        results = 
+        results = model_rgb(x, verbose=False)[0]
     elif type == "IR":
         results = model(frame)
     return results
@@ -65,12 +65,11 @@ def model_helper(model, frame, type = "RGB"):
 if __name__ == "__main__":
     mqtt = MQTT_Publisher("0.0.0.0", 1883, "", "")
     while True:
-        results_rgb_1 = detect(CAMERA_RGB, lambda x: model_helper(model_rgb, x, "RGB"), 
+        results_rgb_1 = detect(CAMERA_RGB, lambda x: model_rgb(x, verbose=False)[0], 
                                CONF_THRESHOLD_RGB, True, False)
         mqtt.publish("Feeder/CV/RGB1", results_rgb_1.to_mqtt_json())
-        results_rgb_2 = detect(CAMERA_RGB_2, lambda x: model_helper(model_rgb, x, "RGB"), 
+        results_rgb_2 = detect(CAMERA_RGB_2, lambda x: model_rgb(x, verbose=False)[0], 
                                CONF_THRESHOLD_RGB2, False, False)
         mqtt.publish("Feeder/CV/RGB2", results_rgb_2.to_mqtt_json())
-        results_ir = detect(CAMERA_IR, lambda x: model_helper(model_ir, x, "IR"), 
-                               CONF_THRESHOLD_IR, False, True)
+        results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
         mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
