@@ -57,7 +57,7 @@ def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
 def model_helper(model, frame, type = "RGB"):
     assert type in ["RGB", "IR"]
     if type == "RGB":
-        results = model_rgb(x, verbose=False)[0]
+        results = model_rgb(frame, verbose=False)[0]
     elif type == "IR":
         results = model(frame)
     return results
