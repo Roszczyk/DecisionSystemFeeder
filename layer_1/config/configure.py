@@ -67,7 +67,8 @@ def run_configure(secrets, context):
   [[inputs.mqtt_consumer]]
     servers = ["tcp://mosquitto:1883"]
     topics = [
-      "Feeder/IoT/+"
+      "Feeder/IoT/+",
+      "Feeder/CV/+"
     ]
     data_format = "json"
     json_string_fields = ["trigger_indicator"]
