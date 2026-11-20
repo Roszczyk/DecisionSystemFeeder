@@ -1,0 +1,83 @@
+import cv2
+import time
+from ultralytics import YOLO
+from datetime import datetime
+import os
+from pathlib import Path
+from time import sleep
+import copy
+
+from layer1_utils import take_frame, get_camera_config, CV_Det
+from thirdparty.geti.utils import load_model
+from mqtt_publisher import MQTT_Publisher
+
+COOLDOWN = 90
+SLEEP_TIME = 30
+
+config = get_camera_config(Path(__file__).parent / "config.json")
+CAMERA_RGB = config["RGBCAM"]
+CAMERA_IR = config["IRCAM"]
+CAMERA_RGB_2 = config["RGBCAM2"]
+
+CONF_THRESHOLD_RGB = 0.5
+CONF_THRESHOLD_IR = 0.7
+CONF_THRESHOLD_RGB2 = 0.5
+
+IR_MODEL_PATH = Path(__file__).parent / "CV_InfraredCamera/Infrared_Bird_Detection/ir_birds_detection_ver1.xml"
+
+model_rgb = YOLO("yolov8n.pt")
+model_ir = load_model(IR_MODEL_PATH)
+
+last_photo_time = 0
+
+def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
+    # TODO: There's different detection method in IR...
+    frame = take_frame(camera_number, rotate=rotate, is_ir=is_ir)
+    results = model(frame)  
+    count_birds = 0
+    conf_list = []
+    for box in results.boxes:
+        cls = int(box.cls[0])
+        conf = float(box.conf[0])
+        name = model_rgb.names[cls]
+
+        if (name == "bird") and conf > conf_threshold:
+            conf_list.append(conf)
+            count_birds += 1
+
+    assert len(conf_list) == count_birds, \
+        f"Number of confidences ({len(conf_list)}) is not the same as bird count ({count_birds})"
+
+    if count_birds == 0:
+        output = CV_Det(False, 0, [], conf_threshold)
+    else:
+        output = CV_Det(True, count_birds, conf_list, conf_threshold)
+
+    return output
+
+if __name__ == "__main__":
+    mqtt = MQTT_Publisher("0.0.0.0", 1883, "", "")
+    while True:
+        results_rgb_1 = detect(CAMERA_RGB, lambda x: model_rgb(x, verbose=False)[0], 
+                               CONF_THRESHOLD_RGB, True, False)
+        mqtt.publish("Feeder/CV/RGB1", results_rgb_1.to_mqtt_json())
+        time.sleep(10)
+        results_rgb_2 = detect(CAMERA_RGB_2, lambda x: model_rgb(x, verbose=False)[0], 
+                               CONF_THRESHOLD_RGB2, False, False)
+        mqtt.publish("Feeder/CV/RGB2", results_rgb_2.to_mqtt_json())
+        time.sleep(10)
+        # =================== TO BE FIXED ====================
+        # results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
+        # =====================================================
+        # ================ TEMPORARY SOLUTION ================
+        frame_ir = take_frame(CAMERA_IR, is_ir=True)
+        ir_results = model_ir(frame_ir)
+        count_ir_birds = 0
+        for i in range(len(ir_results.label_names)):
+            if ir_results.label_names[i] == "Bird" and ir_results.scores[i] > CONF_THRESHOLD_IR:
+                count_ir_birds += 1
+        results_ir = CV_Det(count_ir_birds > 0, count_ir_birds, [CONF_THRESHOLD_IR]*count_ir_birds, CONF_THRESHOLD_IR)
+        # =====================================================
+        mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
+
+        time.sleep(10)
