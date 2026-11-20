@@ -31,6 +31,7 @@ model_ir = load_model(IR_MODEL_PATH)
 last_photo_time = 0
 
 def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
+    # TODO: There's different detection method in IR...
     frame = take_frame(camera_number, rotate=rotate, is_ir=is_ir)
     results = model(frame)  
     count_birds = 0
