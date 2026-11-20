@@ -31,9 +31,7 @@ last_photo_time = 0
 
 def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
     frame = take_frame(camera_number, rotate=rotate, is_ir=is_ir)
-    # ---------------------------------------------------------------------------------------
     results = model(frame)  
-    # Need to address the fact that IR models and RGB models are run a little bit differently
     count_birds = 0
     conf_list = []
     for box in results.boxes:
@@ -55,3 +53,10 @@ def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
 
     return output
 
+def model_helper(model, frame, type = "RGB"):
+    assert type in ["RGB", "IR"]
+    if type == "RGB":
+        results = model(frame, verbose=False)[0]
+    elif type == "IR":
+        results = model(frame)
+    return results
