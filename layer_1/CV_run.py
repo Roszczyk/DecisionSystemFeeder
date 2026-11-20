@@ -66,7 +66,18 @@ if __name__ == "__main__":
                                CONF_THRESHOLD_RGB2, False, False)
         mqtt.publish("Feeder/CV/RGB2", results_rgb_2.to_mqtt_json())
         time.sleep(10)
-        results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
+        # =================== TO BE FIXED ====================
+        # results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
+        # =====================================================
+        # ================ TEMPORARY SOLUTION ================
+        frame_ir = take_frame(CAMERA_IR, is_ir=True)
+        ir_results = model_ir(frame_ir)
+        count_ir_birds = 0
+        for i in range(len(ir_results.label_names)):
+            if ir_results.label_names[i] == "Bird" and ir_results.scores[i] > CONF_THRESHOLD_IR:
+                count_ir_birds += 1
+        results_ir = CV_Det(count_ir_birds > 0, count_ir_birds, [CONF_THRESHOLD_IR]*count_ir_birds)
+        # =====================================================
         mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
 
         time.sleep(10)
