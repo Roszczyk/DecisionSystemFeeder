@@ -31,19 +31,24 @@ model_ir = load_model(IR_MODEL_PATH)
 last_photo_time = 0
 
 def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
-    # TODO: There's different detection method in IR...
     frame = take_frame(camera_number, rotate=rotate, is_ir=is_ir)
     results = model(frame)  
     count_birds = 0
     conf_list = []
-    for box in results.boxes:
-        cls = int(box.cls[0])
-        conf = float(box.conf[0])
-        name = model_rgb.names[cls]
+    if is_ir:
+        for i in range(len(ir_results.label_names)):
+            if ir_results.label_names[i] == "Bird" and ir_results.scores[i] > conf_threshold:
+                count_birds += 1
+                conf_list.append(ir_results.scores[i])
+    else:
+        for box in results.boxes:
+            cls = int(box.cls[0])
+            conf = float(box.conf[0])
+            name = model_rgb.names[cls]
 
-        if (name == "bird") and conf > conf_threshold:
-            conf_list.append(conf)
-            count_birds += 1
+            if (name == "bird") and conf > conf_threshold:
+                conf_list.append(conf)
+                count_birds += 1
 
     assert len(conf_list) == count_birds, \
         f"Number of confidences ({len(conf_list)}) is not the same as bird count ({count_birds})"
@@ -74,25 +79,22 @@ if __name__ == "__main__":
                                CONF_THRESHOLD_RGB, True, False)
         if check_if_publish(previous_state_rgb_1, results_rgb_1):
             mqtt.publish("Feeder/CV/RGB1", results_rgb_1.to_mqtt_json())
+        previous_state_rgb_1 = results_rgb_1.save_as_previous()
         time.sleep(10)
         results_rgb_2 = detect(CAMERA_RGB_2, lambda x: model_rgb(x, verbose=False)[0], 
                                CONF_THRESHOLD_RGB2, False, False)
         if check_if_publish(previous_state_rgb_2, results_rgb_2):
             mqtt.publish("Feeder/CV/RGB2", results_rgb_2.to_mqtt_json())
+        previous_state_rgb_2 = results_rgb_2.save_as_previous()
         time.sleep(10)
         # =================== TO BE FIXED ====================
         # results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
         # =====================================================
         # ================ TEMPORARY SOLUTION ================
-        frame_ir = take_frame(CAMERA_IR, is_ir=True)
-        ir_results = model_ir(frame_ir)
-        count_ir_birds = 0
-        for i in range(len(ir_results.label_names)):
-            if ir_results.label_names[i] == "Bird" and ir_results.scores[i] > CONF_THRESHOLD_IR:
-                count_ir_birds += 1
-        results_ir = CV_Det(count_ir_birds > 0, count_ir_birds, [CONF_THRESHOLD_IR]*count_ir_birds, CONF_THRESHOLD_IR)
+        results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
         # =====================================================
         if check_if_publish(previous_state_ir, results_ir):
             mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
+        previous_state_rgb_1 = results_rgb_1.save_as_previous()
 
         time.sleep(10)

@@ -2,6 +2,7 @@ from pathlib import Path
 import cv2
 import time
 import json
+import datetime
 
 from CV_InfraredCamera.infrared_utils import process_ir_frame
 
@@ -19,6 +20,7 @@ class CV_Det:
             assert c >= 0.0 and c <= 1.0, f"certainties need to be [0.0, 1.0], 0.0<{c}<1.0 does not hold"
         self.certainties = certainties
         self.detection_threshold = detection_threshold
+        self.timestamp = datetime.now()
 
     def to_mqtt_json(self, common_certainty_mode = "highest"):
         assert common_certainty_mode in ["highest", "mean"] 
@@ -36,6 +38,9 @@ class CV_Det:
             "certainty" : common_certainty
         })
         return json.dumps(prep_dict)
+
+    def save_as_previous(self):
+        return [self.is_detected, self.timestamp]
 
 def record_and_save_video(cam_no, save_path, duration=5, is_ir=False, rotate=False, verbose=False):
     cap = cv2.VideoCapture(cam_no)
