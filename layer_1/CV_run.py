@@ -36,10 +36,10 @@ def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
     count_birds = 0
     conf_list = []
     if is_ir:
-        for i in range(len(ir_results.label_names)):
-            if ir_results.label_names[i] == "Bird" and ir_results.scores[i] > conf_threshold:
+        for i in range(len(results.label_names)):
+            if results.label_names[i] == "Bird" and results.scores[i] > conf_threshold:
                 count_birds += 1
-                conf_list.append(ir_results.scores[i])
+                conf_list.append(results.scores[i])
     else:
         for box in results.boxes:
             cls = int(box.cls[0])
