@@ -20,7 +20,7 @@ class CV_Det:
             assert c >= 0.0 and c <= 1.0, f"certainties need to be [0.0, 1.0], 0.0<{c}<1.0 does not hold"
         self.certainties = certainties
         self.detection_threshold = detection_threshold
-        self.timestamp = datetime.now()
+        self.timestamp = datetime.datetime.now()
 
     def to_mqtt_json(self, common_certainty_mode = "highest"):
         assert common_certainty_mode in ["highest", "mean"] 
