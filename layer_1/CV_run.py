@@ -87,12 +87,7 @@ if __name__ == "__main__":
             mqtt.publish("Feeder/CV/RGB2", results_rgb_2.to_mqtt_json())
         previous_state_rgb_2 = results_rgb_2.save_as_previous()
         time.sleep(10)
-        # =================== TO BE FIXED ====================
-        # results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
-        # =====================================================
-        # ================ TEMPORARY SOLUTION ================
         results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
-        # =====================================================
         if check_if_publish(previous_state_ir, results_ir):
             mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
         previous_state_rgb_1 = results_rgb_1.save_as_previous()
