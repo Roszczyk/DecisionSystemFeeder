@@ -65,7 +65,7 @@ def check_if_publish(previous_state, current_state : CV_Det, cooldown = 120):
         return True
     if previous_state[0] != current_state.is_detected:
         return True
-    if datetime.now() - previous_state[1] > cooldown:
+    if (datetime.now() - previous_state[1]).total_seconds() > cooldown:
         return True
     return False
 
