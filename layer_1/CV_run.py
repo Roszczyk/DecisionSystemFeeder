@@ -11,8 +11,9 @@ from layer1_utils import take_frame, get_camera_config, CV_Det
 from thirdparty.geti.utils import load_model
 from mqtt_publisher import MQTT_Publisher
 
-COOLDOWN = 90
-SLEEP_TIME = 30
+COOLDOWN = 120
+SLEEP_TIME_BETWEEN_CAMERAS = 5
+SLEEP_TIME_BETWEEN_ITERATIONS = 10
 
 config = get_camera_config(Path(__file__).parent / "config.json")
 CAMERA_RGB = config["RGBCAM"]
@@ -60,7 +61,7 @@ def detect(camera_number, model, conf_threshold, rotate = False, is_ir = False):
 
     return output
 
-def check_if_publish(previous_state, current_state : CV_Det, cooldown = 120):
+def check_if_publish(previous_state, current_state : CV_Det, cooldown = COOLDOWN):
     if previous_state[0] == None or previous_state[0] == True:
         return True
     if previous_state[0] != current_state.is_detected:
@@ -81,18 +82,18 @@ if __name__ == "__main__":
             if check_if_publish(previous_state_rgb_1, results_rgb_1):
                 mqtt.publish("Feeder/CV/RGB1", results_rgb_1.to_mqtt_json())
             previous_state_rgb_1 = results_rgb_1.save_as_previous()
-            time.sleep(10)
+            time.sleep(SLEEP_TIME_BETWEEN_CAMERAS)
             results_rgb_2 = detect(CAMERA_RGB_2, lambda x: model_rgb(x, verbose=False)[0], 
                                 CONF_THRESHOLD_RGB2, False, False)
             if check_if_publish(previous_state_rgb_2, results_rgb_2):
                 mqtt.publish("Feeder/CV/RGB2", results_rgb_2.to_mqtt_json())
             previous_state_rgb_2 = results_rgb_2.save_as_previous()
-            time.sleep(10)
+            time.sleep(SLEEP_TIME_BETWEEN_CAMERAS)
             results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
             if check_if_publish(previous_state_ir, results_ir):
                 mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
             previous_state_ir = results_ir.save_as_previous()
-            time.sleep(10)
+            time.sleep(SLEEP_TIME_BETWEEN_ITERATIONS)
         except Exception as e:
             print(f"======= Exception happened =======")
             print(f"time: {datetime.now().strftime("%Y-%m-%d %H:%M")}")
