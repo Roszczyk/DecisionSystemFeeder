@@ -75,21 +75,28 @@ if __name__ == "__main__":
     previous_state_rgb_2 = [None, datetime.now()]
     previous_state_ir = [None, datetime.now()]
     while True:
-        results_rgb_1 = detect(CAMERA_RGB, lambda x: model_rgb(x, verbose=False)[0], 
-                               CONF_THRESHOLD_RGB, True, False)
-        if check_if_publish(previous_state_rgb_1, results_rgb_1):
-            mqtt.publish("Feeder/CV/RGB1", results_rgb_1.to_mqtt_json())
-        previous_state_rgb_1 = results_rgb_1.save_as_previous()
-        time.sleep(10)
-        results_rgb_2 = detect(CAMERA_RGB_2, lambda x: model_rgb(x, verbose=False)[0], 
-                               CONF_THRESHOLD_RGB2, False, False)
-        if check_if_publish(previous_state_rgb_2, results_rgb_2):
-            mqtt.publish("Feeder/CV/RGB2", results_rgb_2.to_mqtt_json())
-        previous_state_rgb_2 = results_rgb_2.save_as_previous()
-        time.sleep(10)
-        results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
-        if check_if_publish(previous_state_ir, results_ir):
-            mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
-        previous_state_ir = results_ir.save_as_previous()
-
-        time.sleep(10)
+        try:
+            results_rgb_1 = detect(CAMERA_RGB, lambda x: model_rgb(x, verbose=False)[0], 
+                                CONF_THRESHOLD_RGB, True, False)
+            if check_if_publish(previous_state_rgb_1, results_rgb_1):
+                mqtt.publish("Feeder/CV/RGB1", results_rgb_1.to_mqtt_json())
+            previous_state_rgb_1 = results_rgb_1.save_as_previous()
+            time.sleep(10)
+            results_rgb_2 = detect(CAMERA_RGB_2, lambda x: model_rgb(x, verbose=False)[0], 
+                                CONF_THRESHOLD_RGB2, False, False)
+            if check_if_publish(previous_state_rgb_2, results_rgb_2):
+                mqtt.publish("Feeder/CV/RGB2", results_rgb_2.to_mqtt_json())
+            previous_state_rgb_2 = results_rgb_2.save_as_previous()
+            time.sleep(10)
+            results_ir = detect(CAMERA_IR, model_ir, CONF_THRESHOLD_IR, False, True)
+            if check_if_publish(previous_state_ir, results_ir):
+                mqtt.publish("Feeder/CV/IR", results_ir.to_mqtt_json())
+            previous_state_ir = results_ir.save_as_previous()
+            time.sleep(10)
+        except Exception as e:
+            print(f"======= Exception happened =======")
+            print(f"time: {datetime.now().strftime("%Y-%m-%d %H:%M")}")
+            print(e)
+            print(f"==================================")
+            time.sleep(60)
+        
