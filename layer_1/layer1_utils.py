@@ -2,8 +2,45 @@ from pathlib import Path
 import cv2
 import time
 import json
+import datetime
 
 from CV_InfraredCamera.infrared_utils import process_ir_frame
+
+class CV_Det:
+    def __init__(self, is_detected : bool, how_many : int, certainties : list[float], 
+                 detection_threshold : float):
+        assert (is_detected and how_many > 0) or (not is_detected and how_many == 0), \
+            "Number of objects detected does not match the detection bool"
+        self.is_detected = is_detected
+        self.how_many = how_many
+        assert len(certainties) == how_many, \
+            f"Number of provided certainties ({len(certainties)}) " \
+            f"does not match the number of objects ({how_many})"
+        for c in certainties + [detection_threshold]:
+            assert c >= 0.0 and c <= 1.0, f"certainties need to be [0.0, 1.0], 0.0<{c}<1.0 does not hold"
+        self.certainties = certainties
+        self.detection_threshold = detection_threshold
+        self.timestamp = datetime.datetime.now()
+
+    def to_mqtt_json(self, common_certainty_mode = "highest"):
+        assert common_certainty_mode in ["highest", "mean"] 
+        # TODO: some more fair mode - if we have two birds with prob p1, then the common 
+        #       prob should be >p1, as the level of certainty rises
+        if self.is_detected:
+            common_certainty = max(self.certainties) if common_certainty_mode=="highest" \
+                else sum(self.certainties)/len(self.certainties)
+        else:
+            common_certainty = self.detection_threshold
+            # TODO: Maybe here it's possible to work out some better method...
+        prep_dict = dict({
+            "is_detected" : 1 if self.is_detected else 0,
+            "how_many" : self.how_many,
+            "certainty" : common_certainty
+        })
+        return json.dumps(prep_dict)
+
+    def save_as_previous(self):
+        return [self.is_detected, self.timestamp]
 
 def record_and_save_video(cam_no, save_path, duration=5, is_ir=False, rotate=False, verbose=False):
     cap = cv2.VideoCapture(cam_no)
